@@ -1,5 +1,6 @@
 import zap
 import base64
+import llm
 
 GLOBAL = {}
 
@@ -22,7 +23,9 @@ def start_session(webhook=None):
         # zap.send_message('jarbas', token, '5512981440013', 'hello from jarbas')
 
 def got_zap(user, text):
-    zap.send_message('jarbas', GLOBAL['token'], user, text)
+    r = llm.chat_completions(text)
+    reply = r['choices'][0]['message']['content']
+    zap.send_message('jarbas', GLOBAL['token'], user, reply)
 
 def saveToFile(base64_string, path):
     if base64_string.startswith('data:image/png;base64,'):
