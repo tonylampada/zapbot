@@ -3,8 +3,7 @@ load_dotenv()
 
 from fastapi import FastAPI, Request
 import jarbas
-import os
-import zap
+import json
 
 app = FastAPI()
 
@@ -16,10 +15,12 @@ def read_root():
 async def got_zap(request: Request):
     headers = dict(request.headers)
     body = await request.json()
+    # print(json.dumps(body, indent=2))
     if body['event'] == 'onmessage':
         msgfrom = body['from']
         text = body['body']
-        jarbas.got_zap(msgfrom, text)
+        t = body['t']
+        jarbas.got_zap(msgfrom, text, t)
     return {"status": "OK"}
 
 def main():

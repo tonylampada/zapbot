@@ -6,12 +6,8 @@ BASE_URL = os.getenv('LLM_BASE_URL', 'http://localhost:1234')
 def get_models():
     return _get('v1/models')
 
-def chat_completions(prompt, model='default-model'):
-    messages = [{"role": "user", "content": prompt}]
+def chat_completions(messages, model='default-model'):
     return _post('v1/chat/completions', messages=messages, model=model)
-
-def completions(prompt, model='default-model'):
-    return _post('v1/completions', prompt=prompt, model=model)
 
 def embeddings(input_text, model='default-model'):
     return _post('v1/embeddings', input=input_text, model=model)
@@ -41,10 +37,18 @@ def _get(command):
         raise Exception(f"Error. Status code: {response.status_code} {response.json()}")
 
 def _dummy_test():
-    prompt = "Hello, how are you?"
     try:
-        response = chat_completions(prompt)
-        print("Response:", response)
+        messages = [
+            {"role": "user", "content": "Hello, how are you?"},
+            {
+                "role": "assistant",
+                "content": "I'm a large language model, so I don't have emotions or feelings like humans do. However, I're here to help and support you in any way I can. How about you? How's your day going?"
+            },
+            {"role": "user", "content": "Pretend you have."},
+        ]
+        response = chat_completions(messages)
+        import json
+        print(json.dumps(response, indent=2))
     except Exception as e:
         print("Error:", e)
 
