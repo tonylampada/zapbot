@@ -1,0 +1,6 @@
+wppconnect-server/
+docker/wppconfig.js
+.env
+*.pyc
+__pycache__
+x.png
