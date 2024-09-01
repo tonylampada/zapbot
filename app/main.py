@@ -17,10 +17,16 @@ async def got_zap(request: Request):
     body = await request.json()
     # print(json.dumps(body, indent=2))
     if body['event'] == 'onmessage':
-        msgfrom = body['from']
-        text = body['body']
-        t = body['t']
-        jarbas.got_zap(msgfrom, text, t)
+        if body['type'] == 'chat':
+            msgfrom = body['from']
+            text = body['body']
+            t = body['t']
+            jarbas.got_chat(msgfrom, text, t)
+        elif body['type'] == 'ptt':
+            msgfrom = body['from']
+            audio_base64 = body['body']
+            t = body['t']
+            jarbas.got_audio(msgfrom, audio_base64, t)
     return {"status": "OK"}
 
 def main():

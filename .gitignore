@@ -4,3 +4,4 @@ docker/wppconfig.js
 *.pyc
 __pycache__
 x.png
+data/
