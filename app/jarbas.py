@@ -8,6 +8,13 @@ GLOBAL = {
     "history": {}
 }
 
+MODEL_OVERRIDES = {
+    '5512981440013@c.us': 'dolphin-llama3',
+    '5512981812300@c.us': 'dolphin-llama3',
+    '5512988653063@c.us': 'dolphin-llama3',
+}
+DEFAULT_MODEL = 'llama3'
+
 def start_session(webhook=None):
     sessions = zap.show_all_sessions()
     print("sessions", sessions)
@@ -24,19 +31,20 @@ def start_session(webhook=None):
     if status == 'CONNECTED':
         GLOBAL['token'] = token
         return True
-        # zap.send_message('jarbas', token, '5512981440013', 'hello from jarbas')
 
 def got_chat(user, text, t):
+    print(user)
     messages = _get_messages_history_and_maybe_reset_and_notify_user(user)
     user_timestamp = datetime.fromtimestamp(t)
     messages.append({"role": "user", "content": text, "timestamp": user_timestamp})
-    r = llm.chat_completions([{"role": m['role'], "content": m['content']} for m in messages])
-    agent_msg = r['choices'][0]['message']
+    agent_msg = llm.chat_completions_ollama([{"role": m['role'], "content": m['content']} for m in messages], model=_get_model_for(user))
     reply = agent_msg['content']
     zap.send_message('jarbas', GLOBAL['token'], user, reply)
     agent_msg["timestamp"] = datetime.now()
     messages.append(agent_msg)
 
+def _get_model_for(user):
+    return MODEL_OVERRIDES.get(user) or DEFAULT_MODEL
 
 def got_audio(user, audio_base64, t):
     zap.send_message('jarbas', GLOBAL['token'], user, "Transcribing audio. Please wait...")
