@@ -15,13 +15,20 @@ def read_root():
 async def got_zap(request: Request):
     headers = dict(request.headers)
     body = await request.json()
-    # print(json.dumps(body, indent=2))
+    print(json.dumps(body, indent=2))
     if body['event'] == 'onmessage':
         if body['type'] == 'chat':
-            msgfrom = body['from']
             text = body['body']
             t = body['t']
-            jarbas.got_chat(msgfrom, text, t)
+            isGroup = body["isGroupMsg"]
+            if isGroup:
+                groupfrom = body['from']
+                msgfrom = body['author']
+                senderName = body['sender']['formattedName']
+                jarbas.got_group_chat(groupfrom, msgfrom, senderName, text, t)
+            else:
+                msgfrom = body['from']
+                jarbas.got_chat(msgfrom, text, t)
         elif body['type'] == 'ptt':
             msgfrom = body['from']
             audio_base64 = body['body']

@@ -28,6 +28,9 @@ def start_session(sessionName, token, webhook=None):
 def send_message(sessionName, token, phone, message):
     return _post('send-message', sessionName, token, expectCode=201, phone=phone, message=message, isGroup=False, isNewsletter=False)
 
+def send_group_message(sessionName, token, phone, message):
+    return _post('send-message', sessionName, token, expectCode=201, phone=phone, message=message, isGroup=True, isNewsletter=False)
+
 def list_chats(sessionName, token):
     return _post('list-chats', sessionName, token)
 
@@ -58,3 +61,9 @@ def _get(command, token=None):
         return response.json()
     else:
         raise Exception(f"Error. Status code: {response.status_code} {response.json()}")
+
+if __name__ == '__main__':
+    token = generate_token('jarbas')
+    print("token", token)
+    r = send_group_message('jarbas', token, '5512981440013-1574914013', 'olá classe')
+    print("r", r)

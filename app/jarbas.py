@@ -43,8 +43,37 @@ def got_chat(user, text, t):
     agent_msg["timestamp"] = datetime.now()
     messages.append(agent_msg)
 
+def got_group_chat(groupfrom, msgfrom, senderName, text, t):
+    historico = zap.get_last_messages(groupfrom, 10)
+    prompt = _group_prompt(historico)
+    reply_llm = llm.chat_completions_ollama([{"role": "user", "content": prompt}], model="llama3")
+    if reply_llm != "SILENCIO":
+        zap.send_group_message('jarbas', GLOBAL['token'], groupfrom, reply_llm)
+
 def _get_model_for(user):
     return MODEL_OVERRIDES.get(user) or DEFAULT_MODEL
+
+def _group_prompt(historico):
+    # TODO: montar o prompt direto com as mensagens que vieram do grupo
+    return """
+    Você é o Jarbas. Um assistente virtual funcionando dentro de um grupo do whatsapp.
+    Você é notificado de toda mensagem que chega no grupo.
+    Normalmente você não precisa se envolver na conversa.
+    Mas, quando solicitado, você deve dar uma resposta.
+    Se nao quiser responder nada, responsa esta mensagem com o texto "SILENCIO".
+    Caso contrario, sua resposta será enviada para o grupo.
+    Segue abaixo as últimas mensagens da conversa:
+
+    <Tony> 
+    Bom dia meu amor
+    <Samantha>
+    Bom dia vc dormiu bem mozinho
+    <Tony> 
+    Nao!
+    Tive um pesadelo!
+    <Tony>
+    Ô Jarbas, o que significa sonhar com aranha, de acordo com Freud?
+    """
 
 def got_audio(user, audio_base64, t):
     zap.send_message('jarbas', GLOBAL['token'], user, "Transcribing audio. Please wait...")
