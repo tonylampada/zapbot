@@ -1,4 +1,5 @@
 wppconnect-server/
+wppconnect_tokens/
 docker/wppconfig.js
 .env
 *.pyc
