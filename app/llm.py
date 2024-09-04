@@ -1,5 +1,9 @@
 import requests
 import os
+import json
+import logging
+logger = logging.getLogger(__name__)
+
 
 # BASE_URL = os.getenv('LLM_BASE_URL', 'http://localhost:1234') # LM studio
 BASE_URL = os.getenv('LLM_BASE_URL', 'http://localhost:11434') # ollama
@@ -11,8 +15,8 @@ def chat_completions(messages, model='default-model'):
     return _post('v1/chat/completions', messages=messages, model=model)
 
 def chat_completions_ollama(messages, model='llama3'):
-    print("model", model)
     r = _post('api/chat', messages=messages, model=model, stream=False)
+    logger.info(f"PROMPTING {model}:\n{json.dumps(messages, indent=2)}\n\n\nREPLY_LLM\n{r['message']['content']}")
     return r['message']
 
 def embeddings(input_text, model='default-model'):
@@ -25,9 +29,6 @@ def _post(command, expectCode=200, **kwargs):
         "Content-Type": "application/json",
     }
     response = requests.post(url, headers=headers, json=kwargs)
-    print(response.status_code)
-    a = response.text
-    print("a", a)
     if response.status_code == expectCode:
         return response.json()
     else:

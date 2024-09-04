@@ -1,9 +1,13 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+from logging_config import setup_logging
+setup_logging()
+
 from fastapi import FastAPI, Request
 import jarbas
-import json
+import logging
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -15,7 +19,7 @@ def read_root():
 async def got_zap(request: Request):
     headers = dict(request.headers)
     body = await request.json()
-    print(json.dumps(body, indent=2))
+    # logger.info(f"Requisição POST recebida em /zap: {json.dumps(body, indent=2)}")
     if body['event'] == 'onmessage':
         if body['type'] == 'chat':
             text = body['body']
@@ -37,9 +41,12 @@ async def got_zap(request: Request):
     return {"status": "OK"}
 
 def main():
+    logger.info("Iniciando a aplicação")
     if not jarbas.start_session(webhook='http://172.17.0.1:8000/zap'):
+        logger.error("Falha ao iniciar a sessão do Jarbas")
         return
     import uvicorn
+    logger.info("Iniciando o servidor Uvicorn")
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 if __name__ == "__main__":

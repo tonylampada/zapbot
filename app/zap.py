@@ -11,7 +11,6 @@ def generate_token(sessionName):
         r = response.json()
         return r['token']
     else:
-        print(response)
         raise Exception(f"Failed to generate token. Status code: {response.status_code} {response.json()}")
 
 def show_all_sessions():
@@ -31,8 +30,20 @@ def send_message(sessionName, token, phone, message):
 def send_group_message(sessionName, token, phone, message):
     return _post('send-message', sessionName, token, expectCode=201, phone=phone, message=message, isGroup=True, isNewsletter=False)
 
-def list_chats(sessionName, token):
-    return _post('list-chats', sessionName, token)
+def list_chats(sessionName, token, onlyGroups):
+    return _post('list-chats', sessionName, token, onlyGroups=onlyGroups)
+
+def get_messages(sessionName, token, phone, count):
+    r = _get(f'{sessionName}/get-messages/{phone}', token, count=count)
+    return [{
+        "id": o.get("id"),
+        "body": o.get("body"),
+        "content": o.get("content"),
+        "type": o.get("type"),
+        "t": o.get("t"),
+        "senderName": (o.get("sender") or {}).get("name"),
+        "author": o.get("author"),
+    } for o in r['response']]
 
 def _post(command, sessionName, token, expectCode=200, **kwargs):
     url = f"{BASE_URL}/api/{sessionName}/{command}"
@@ -47,7 +58,7 @@ def _post(command, sessionName, token, expectCode=200, **kwargs):
     else:
         raise Exception(f"Error. Status code: {response.status_code} {response.json()}")
 
-def _get(command, token=None):
+def _get(command, token=None, **kwargs):
     url = f"{BASE_URL}/api/{command}"
     headers = {
         "Accept": "application/json",
@@ -56,14 +67,19 @@ def _get(command, token=None):
     if token:
         headers["Authorization"] = f"Bearer {token}"
 
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, params=kwargs)
     if response.status_code == 200:
         return response.json()
     else:
         raise Exception(f"Error. Status code: {response.status_code} {response.json()}")
 
 if __name__ == '__main__':
+    import json
     token = generate_token('jarbas')
     print("token", token)
-    r = send_group_message('jarbas', token, '5512981440013-1574914013', 'olá classe')
-    print("r", r)
+    # r = get_last_messages('jarbas', token, '5512981440013-1574914013', 10)
+    # r = list_chats('jarbas', token, onlyGroups=True)
+    # r = get_messages('jarbas', token, '120363330535830326@g.us', 10)
+    # print("r", json.dumps(r, indent=2))
+    send_group_message('jarbas', token, '120363330535830326@g.us', 'teste')
+    # print("r", json.dumps([f"{o['id']['user']}/{o['contact']['name']}" for o in r], indent=2))

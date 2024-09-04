@@ -3,6 +3,9 @@ import base64
 import llm
 import transcribe_audio
 from datetime import datetime, timedelta
+import logging
+import json
+logger = logging.getLogger(__name__)
 
 GLOBAL = {
     "history": {}
@@ -17,23 +20,21 @@ DEFAULT_MODEL = 'llama3'
 
 def start_session(webhook=None):
     sessions = zap.show_all_sessions()
-    print("sessions", sessions)
+    logger.info(f"sessions: {sessions}")
     token = zap.generate_token('jarbas')
-    print("token", token)
+    logger.info(f"token: {token}")
     status = zap.status_session('jarbas', token)
-    print("status", status)
-    if status == 'CLOSED':
+    logger.info(f"status: {status}")
+    if status != 'CONNECTED':
         newsession = zap.start_session('jarbas', token, webhook)
         qrcode = newsession['qrcode']
         saveToFile(qrcode, './data/qrcode.png')
-        print("saved qrcode")
+        logger.info("saved qrcode")
         return False
-    if status == 'CONNECTED':
-        GLOBAL['token'] = token
-        return True
+    GLOBAL['token'] = token
+    return True
 
 def got_chat(user, text, t):
-    print(user)
     messages = _get_messages_history_and_maybe_reset_and_notify_user(user)
     user_timestamp = datetime.fromtimestamp(t)
     messages.append({"role": "user", "content": text, "timestamp": user_timestamp})
@@ -44,36 +45,48 @@ def got_chat(user, text, t):
     messages.append(agent_msg)
 
 def got_group_chat(groupfrom, msgfrom, senderName, text, t):
-    historico = zap.get_last_messages(groupfrom, 10)
-    prompt = _group_prompt(historico)
-    reply_llm = llm.chat_completions_ollama([{"role": "user", "content": prompt}], model="llama3")
-    if reply_llm != "SILENCIO":
+    zap_messages = zap.get_messages('jarbas', GLOBAL['token'], groupfrom, 10)
+    reply_llm = _get_group_reply(zap_messages)
+    if reply_llm:
         zap.send_group_message('jarbas', GLOBAL['token'], groupfrom, reply_llm)
 
 def _get_model_for(user):
     return MODEL_OVERRIDES.get(user) or DEFAULT_MODEL
 
-def _group_prompt(historico):
-    # TODO: montar o prompt direto com as mensagens que vieram do grupo
-    return """
-    Você é o Jarbas. Um assistente virtual funcionando dentro de um grupo do whatsapp.
-    Você é notificado de toda mensagem que chega no grupo.
-    Normalmente você não precisa se envolver na conversa.
-    Mas, quando solicitado, você deve dar uma resposta.
-    Se nao quiser responder nada, responsa esta mensagem com o texto "SILENCIO".
-    Caso contrario, sua resposta será enviada para o grupo.
-    Segue abaixo as últimas mensagens da conversa:
+def _get_group_reply(zap_messages):
+    sysprompt = """
+Você é o Jarbas. Um assistente virtual funcionando dentro de um grupo do whatsapp.
+Quando solicitado, você deve dar uma resposta.
+Mas normalmente você não precisa se envolver na conversa, responda apenas quando vc for chamado pelo nome.
+Eu vou te mandar o historico recente do grupo, e vc decide se quer responder ou não.
+"""
+    messages = [{"role": "system", "content": sysprompt}]
+    last_message = zap_messages[-1]
+    zap_messages = zap_messages[:-1]
 
-    <Tony> 
-    Bom dia meu amor
-    <Samantha>
-    Bom dia vc dormiu bem mozinho
-    <Tony> 
-    Nao!
-    Tive um pesadelo!
-    <Tony>
-    Ô Jarbas, o que significa sonhar com aranha, de acordo com Freud?
-    """
+    content = ""
+    if zap_messages:
+        content = "Últimas mensagens do grupo:\n"
+        for m in zap_messages:
+            senderName = m['senderName']
+            zcontent = m["content"]
+            content += f"- <{senderName}> {zcontent}"
+        content += "\n"
+    content += "Nova mensagem:\n"
+    senderName = last_message['senderName']
+    zcontent = last_message["content"]
+    content += f"- <{senderName}> {zcontent}"
+    content += "\n"
+    content += 'Essa mensagem precisa de uma resposta? Responda apenas com "SIM" ou "NAO".'
+    messages.append({"role": "user", "content": content})
+    reply_llm = llm.chat_completions_ollama(messages, model="llama3")
+    if reply_llm['content'].lower() != 'sim':
+        return None
+    messages.append(reply_llm)
+    messages.append({"role": "user", "content": "Qual a resposta?"})
+    reply_llm = llm.chat_completions_ollama(messages, model="llama3")
+    return reply_llm['content']
+
 
 def got_audio(user, audio_base64, t):
     zap.send_message('jarbas', GLOBAL['token'], user, "Transcribing audio. Please wait...")

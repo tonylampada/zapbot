@@ -1,0 +1,487 @@
+[
+  {
+    "id": {
+      "server": "g.us",
+      "user": "120363330535830326",
+      "_serialized": "120363330535830326@g.us"
+    },
+    "lastReceivedKey": {
+      "fromMe": false,
+      "remote": {
+        "server": "g.us",
+        "user": "120363330535830326",
+        "_serialized": "120363330535830326@g.us"
+      },
+      "id": "B698337BB92F1C38D3029413B695A3D1",
+      "participant": {
+        "server": "c.us",
+        "user": "5512981812300",
+        "_serialized": "5512981812300@c.us"
+      },
+      "_serialized": "false_120363330535830326@g.us_B698337BB92F1C38D3029413B695A3D1_5512981812300@c.us"
+    },
+    "t": 1725402645,
+    "unreadCount": 6,
+    "unreadDividerOffset": 0,
+    "isReadOnly": false,
+    "isAnnounceGrpRestrict": false,
+    "muteExpiration": 0,
+    "isAutoMuted": false,
+    "hasUnreadMention": false,
+    "archiveAtMentionViewedInDrawer": false,
+    "hasChatBeenOpened": false,
+    "isDeprecated": false,
+    "pendingInitialLoading": false,
+    "celebrationAnimationLastPlayed": 0,
+    "hasRequestedWelcomeMsg": false,
+    "msgs": null,
+    "kind": "group",
+    "isBroadcast": false,
+    "isGroup": true,
+    "isUser": false,
+    "contact": {
+      "id": {
+        "server": "g.us",
+        "user": "120363330535830326",
+        "_serialized": "120363330535830326@g.us"
+      },
+      "name": "Pesquisa IA",
+      "type": "in",
+      "privacyMode": null,
+      "textStatusLastUpdateTime": -1,
+      "syncToAddressbook": false,
+      "formattedName": "Pesquisa IA",
+      "isMe": false,
+      "isMyContact": false,
+      "isPSA": false,
+      "isUser": false,
+      "isWAContact": false,
+      "profilePicThumbObj": {
+        "eurl": "https://pps.whatsapp.net/v/t61.24694-24/456729295_524470406618863_7153514993548797328_n.jpg?ccb=11-4&oh=01_Q5AaIAsi1cQpdMWfNnhu7iLcMmF9ZF8KI33lGpdNir3jHc3N&oe=66E4B7ED&_nc_sid=5e03e0&_nc_cat=109",
+        "id": {
+          "server": "g.us",
+          "user": "120363330535830326",
+          "_serialized": "120363330535830326@g.us"
+        },
+        "img": "https://media-gru2-1.cdn.whatsapp.net/v/t61.24694-24/456729295_524470406618863_7153514993548797328_n.jpg?stp=dst-jpg_s96x96&ccb=11-4&oh=01_Q5AaIPTIJxJQ7z2uJGouWICyGhKDXFmcxxNsNeXi--EnRQIM&oe=66E4B7ED&_nc_sid=5e03e0&_nc_cat=109",
+        "imgFull": "https://media-gru2-1.cdn.whatsapp.net/v/t61.24694-24/456729295_524470406618863_7153514993548797328_n.jpg?ccb=11-4&oh=01_Q5AaIAsi1cQpdMWfNnhu7iLcMmF9ZF8KI33lGpdNir3jHc3N&oe=66E4B7ED&_nc_sid=5e03e0&_nc_cat=109",
+        "tag": "1725402467"
+      },
+      "msgs": null
+    },
+    "groupMetadata": {
+      "id": {
+        "server": "g.us",
+        "user": "120363330535830326",
+        "_serialized": "120363330535830326@g.us"
+      },
+      "creation": 1725402409,
+      "owner": {
+        "server": "c.us",
+        "user": "5512981440013",
+        "_serialized": "5512981440013@c.us"
+      },
+      "subject": "Pesquisa IA",
+      "subjectTime": 1725402409,
+      "restrict": false,
+      "announce": false,
+      "noFrequentlyForwarded": false,
+      "membershipApprovalMode": false,
+      "size": 4,
+      "support": false,
+      "suspended": false,
+      "terminated": false,
+      "uniqueShortNameMap": {},
+      "isLidAddressingMode": false,
+      "isParentGroup": false,
+      "isParentGroupClosed": false,
+      "defaultSubgroup": false,
+      "generalSubgroup": false,
+      "hiddenSubgroup": false,
+      "generalChatAutoAddDisabled": false,
+      "allowNonAdminSubGroupCreation": false,
+      "incognito": false,
+      "hasCapi": false,
+      "participants": [
+        {
+          "id": {
+            "server": "c.us",
+            "user": "5512988653063",
+            "_serialized": "5512988653063@c.us"
+          },
+          "isAdmin": true,
+          "isSuperAdmin": false
+        },
+        {
+          "id": {
+            "server": "c.us",
+            "user": "5512982291968",
+            "_serialized": "5512982291968@c.us"
+          },
+          "isAdmin": false,
+          "isSuperAdmin": false
+        },
+        {
+          "id": {
+            "server": "c.us",
+            "user": "5512981812300",
+            "_serialized": "5512981812300@c.us"
+          },
+          "isAdmin": true,
+          "isSuperAdmin": false
+        },
+        {
+          "id": {
+            "server": "c.us",
+            "user": "5512981440013",
+            "_serialized": "5512981440013@c.us"
+          },
+          "isAdmin": true,
+          "isSuperAdmin": false
+        }
+      ],
+      "pendingParticipants": [],
+      "pastParticipants": [],
+      "membershipApprovalRequests": [],
+      "subgroupSuggestions": []
+    },
+    "presence": {
+      "id": {
+        "server": "g.us",
+        "user": "120363330535830326",
+        "_serialized": "120363330535830326@g.us"
+      },
+      "chatstates": [
+        {
+          "id": {
+            "server": "c.us",
+            "user": "5512981440013",
+            "_serialized": "5512981440013@c.us"
+          },
+          "type": "unavailable"
+        },
+        {
+          "id": {
+            "server": "c.us",
+            "user": "5512988653063",
+            "_serialized": "5512988653063@c.us"
+          },
+          "type": "unavailable"
+        },
+        {
+          "id": {
+            "server": "c.us",
+            "user": "5512981812300",
+            "_serialized": "5512981812300@c.us"
+          },
+          "type": "unavailable"
+        }
+      ]
+    }
+  },
+  {
+    "id": {
+      "server": "g.us",
+      "user": "5512981440013-1574914013",
+      "_serialized": "5512981440013-1574914013@g.us"
+    },
+    "pendingMsgs": false,
+    "lastReceivedKey": {
+      "fromMe": false,
+      "remote": {
+        "server": "g.us",
+        "user": "5512981440013-1574914013",
+        "_serialized": "5512981440013-1574914013@g.us"
+      },
+      "id": "2F43B59BFBA3CAAD5DAF3A753BA03C30",
+      "participant": {
+        "server": "c.us",
+        "user": "5512981440013",
+        "_serialized": "5512981440013@c.us"
+      },
+      "_serialized": "false_5512981440013-1574914013@g.us_2F43B59BFBA3CAAD5DAF3A753BA03C30_5512981440013@c.us"
+    },
+    "t": 1725396113,
+    "unreadCount": 0,
+    "unreadDividerOffset": 0,
+    "archive": false,
+    "isReadOnly": false,
+    "isLocked": false,
+    "isAnnounceGrpRestrict": false,
+    "muteExpiration": 0,
+    "isAutoMuted": false,
+    "name": "Eu",
+    "notSpam": true,
+    "ephemeralDuration": 0,
+    "ephemeralSettingTimestamp": 0,
+    "disappearingModeInitiator": "chat",
+    "disappearingModeTrigger": "chat_settings",
+    "unreadMentionCount": 0,
+    "hasUnreadMention": false,
+    "archiveAtMentionViewedInDrawer": false,
+    "hasChatBeenOpened": false,
+    "tcToken": null,
+    "tcTokenTimestamp": null,
+    "endOfHistoryTransferType": 1,
+    "pendingInitialLoading": false,
+    "celebrationAnimationLastPlayed": 0,
+    "hasRequestedWelcomeMsg": false,
+    "msgs": null,
+    "kind": "group",
+    "isBroadcast": false,
+    "isGroup": true,
+    "isUser": false,
+    "contact": {
+      "id": {
+        "server": "g.us",
+        "user": "5512981440013-1574914013",
+        "_serialized": "5512981440013-1574914013@g.us"
+      },
+      "name": "Eu",
+      "type": "in",
+      "textStatusLastUpdateTime": -1,
+      "syncToAddressbook": false,
+      "formattedName": "Eu",
+      "isMe": false,
+      "isMyContact": false,
+      "isPSA": false,
+      "isUser": false,
+      "isWAContact": false,
+      "profilePicThumbObj": {
+        "eurl": "https://pps.whatsapp.net/v/t61.24694-24/68987047_2455273561187038_8476055833685536865_n.jpg?ccb=11-4&oh=01_Q5AaIPUf4nPzIageVolx-6k8bZqT7sTLfE2h18mr30aS3FXO&oe=66E44238&_nc_sid=5e03e0&_nc_cat=105",
+        "id": {
+          "server": "g.us",
+          "user": "5512981440013-1574914013",
+          "_serialized": "5512981440013-1574914013@g.us"
+        },
+        "img": "https://media-gru2-1.cdn.whatsapp.net/v/t61.24694-24/68987047_2455273561187038_8476055833685536865_n.jpg?stp=dst-jpg_s96x96&ccb=11-4&oh=01_Q5AaIE3z6gaF7ksho8BoqoXZxlLiW6IMIZDi5dmO3GD5SWfH&oe=66E44238&_nc_sid=5e03e0&_nc_cat=105",
+        "imgFull": "https://media-gru2-1.cdn.whatsapp.net/v/t61.24694-24/68987047_2455273561187038_8476055833685536865_n.jpg?ccb=11-4&oh=01_Q5AaIPUf4nPzIageVolx-6k8bZqT7sTLfE2h18mr30aS3FXO&oe=66E44238&_nc_sid=5e03e0&_nc_cat=105",
+        "tag": "1574914099"
+      },
+      "msgs": null
+    },
+    "groupMetadata": {
+      "id": {
+        "server": "g.us",
+        "user": "5512981440013-1574914013",
+        "_serialized": "5512981440013-1574914013@g.us"
+      },
+      "creation": 1574914013,
+      "owner": {
+        "server": "c.us",
+        "user": "5512981440013",
+        "_serialized": "5512981440013@c.us"
+      },
+      "subject": "Eu",
+      "subjectTime": 1574914013,
+      "descTime": 0,
+      "restrict": false,
+      "announce": false,
+      "noFrequentlyForwarded": false,
+      "ephemeralDuration": 0,
+      "membershipApprovalMode": false,
+      "memberAddMode": "admin_add",
+      "reportToAdminMode": false,
+      "size": 0,
+      "support": false,
+      "suspended": false,
+      "terminated": false,
+      "uniqueShortNameMap": {},
+      "isLidAddressingMode": false,
+      "isParentGroup": false,
+      "isParentGroupClosed": false,
+      "defaultSubgroup": false,
+      "generalSubgroup": false,
+      "generalChatAutoAddDisabled": false,
+      "allowNonAdminSubGroupCreation": false,
+      "lastActivityTimestamp": 0,
+      "lastSeenActivityTimestamp": 0,
+      "incognito": false,
+      "hasCapi": false,
+      "participants": [
+        {
+          "id": {
+            "server": "c.us",
+            "user": "5512982291968",
+            "_serialized": "5512982291968@c.us"
+          },
+          "isAdmin": false,
+          "isSuperAdmin": false
+        },
+        {
+          "id": {
+            "server": "c.us",
+            "user": "5512981440013",
+            "_serialized": "5512981440013@c.us"
+          },
+          "isAdmin": true,
+          "isSuperAdmin": false
+        }
+      ],
+      "pendingParticipants": [],
+      "pastParticipants": [],
+      "membershipApprovalRequests": [],
+      "subgroupSuggestions": []
+    },
+    "presence": {
+      "id": {
+        "server": "g.us",
+        "user": "5512981440013-1574914013",
+        "_serialized": "5512981440013-1574914013@g.us"
+      },
+      "chatstates": [
+        {
+          "id": {
+            "server": "c.us",
+            "user": "5512981440013",
+            "_serialized": "5512981440013@c.us"
+          },
+          "type": "unavailable"
+        }
+      ]
+    }
+  },
+  {
+    "id": {
+      "server": "g.us",
+      "user": "120363312484622484",
+      "_serialized": "120363312484622484@g.us"
+    },
+    "lastReceivedKey": {
+      "fromMe": true,
+      "remote": {
+        "server": "g.us",
+        "user": "120363312484622484",
+        "_serialized": "120363312484622484@g.us"
+      },
+      "id": "B264DA6D89006AB579375F7BE6EAA27C",
+      "participant": {
+        "server": "c.us",
+        "user": "5512982291968",
+        "_serialized": "5512982291968@c.us"
+      },
+      "_serialized": "true_120363312484622484@g.us_B264DA6D89006AB579375F7BE6EAA27C_5512982291968@c.us"
+    },
+    "t": 1725151361,
+    "unreadCount": 0,
+    "unreadDividerOffset": 0,
+    "archive": false,
+    "isReadOnly": false,
+    "isLocked": false,
+    "isAnnounceGrpRestrict": false,
+    "muteExpiration": 0,
+    "isAutoMuted": false,
+    "name": "Eu",
+    "notSpam": true,
+    "ephemeralDuration": 0,
+    "ephemeralSettingTimestamp": 0,
+    "disappearingModeInitiator": "chat",
+    "disappearingModeTrigger": "chat_settings",
+    "unreadMentionCount": 0,
+    "hasUnreadMention": false,
+    "archiveAtMentionViewedInDrawer": false,
+    "hasChatBeenOpened": false,
+    "tcToken": null,
+    "tcTokenTimestamp": null,
+    "endOfHistoryTransferType": 1,
+    "pendingInitialLoading": false,
+    "celebrationAnimationLastPlayed": 0,
+    "hasRequestedWelcomeMsg": false,
+    "msgs": null,
+    "kind": "group",
+    "isBroadcast": false,
+    "isGroup": true,
+    "isUser": false,
+    "contact": {
+      "id": {
+        "server": "g.us",
+        "user": "120363312484622484",
+        "_serialized": "120363312484622484@g.us"
+      },
+      "name": "Eu",
+      "type": "in",
+      "textStatusLastUpdateTime": -1,
+      "syncToAddressbook": false,
+      "formattedName": "Eu",
+      "isMe": false,
+      "isMyContact": false,
+      "isPSA": false,
+      "isUser": false,
+      "isWAContact": false,
+      "profilePicThumbObj": {},
+      "msgs": null
+    },
+    "groupMetadata": {
+      "id": {
+        "server": "g.us",
+        "user": "120363312484622484",
+        "_serialized": "120363312484622484@g.us"
+      },
+      "creation": 1725146053,
+      "owner": {
+        "server": "c.us",
+        "user": "5512982291968",
+        "_serialized": "5512982291968@c.us"
+      },
+      "subject": "Eu",
+      "subjectTime": 1725146053,
+      "descTime": 0,
+      "restrict": false,
+      "announce": false,
+      "noFrequentlyForwarded": false,
+      "ephemeralDuration": 0,
+      "membershipApprovalMode": false,
+      "memberAddMode": "all_member_add",
+      "reportToAdminMode": false,
+      "size": 0,
+      "support": false,
+      "suspended": false,
+      "terminated": false,
+      "uniqueShortNameMap": {},
+      "isLidAddressingMode": false,
+      "isParentGroup": false,
+      "isParentGroupClosed": false,
+      "defaultSubgroup": false,
+      "generalSubgroup": false,
+      "generalChatAutoAddDisabled": false,
+      "allowNonAdminSubGroupCreation": false,
+      "lastActivityTimestamp": 0,
+      "lastSeenActivityTimestamp": 0,
+      "incognito": false,
+      "hasCapi": false,
+      "participants": [
+        {
+          "id": {
+            "server": "c.us",
+            "user": "5512982291968",
+            "_serialized": "5512982291968@c.us"
+          },
+          "isAdmin": true,
+          "isSuperAdmin": false
+        }
+      ],
+      "pendingParticipants": [],
+      "pastParticipants": [
+        {
+          "id": {
+            "server": "c.us",
+            "user": "554888199352",
+            "_serialized": "554888199352@c.us"
+          },
+          "leaveTs": 1725146067,
+          "leaveReason": "Removed"
+        }
+      ],
+      "membershipApprovalRequests": [],
+      "subgroupSuggestions": []
+    },
+    "presence": {
+      "id": {
+        "server": "g.us",
+        "user": "120363312484622484",
+        "_serialized": "120363312484622484@g.us"
+      },
+      "chatstates": []
+    }
+  }
+]
