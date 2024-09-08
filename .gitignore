@@ -7,3 +7,4 @@ docker/wppconfig.js
 __pycache__
 x.png
 data/
+sql_app.db

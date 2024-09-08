@@ -5,18 +5,24 @@ import transcribe_audio
 from datetime import datetime, timedelta
 import logging
 import json
+from database import dbsession
 logger = logging.getLogger(__name__)
+from jarbas_actions import DIARY_LIST, DIARY_CREATE, DIARY_ENTRY_LIST, DIARY_ENTRY_CREATE
+import jarbas_actions
 
 GLOBAL = {
     "history": {}
 }
 
 MODEL_OVERRIDES = {
-    '5512981440013@c.us': 'dolphin-llama3',
-    '5512981812300@c.us': 'dolphin-llama3',
-    '5512988653063@c.us': 'dolphin-llama3',
+    '5512981440013@c.us': 'llama3.1',
+    '5512981812300@c.us': 'llama3.1',
+    '5512988653063@c.us': 'llama3.1',
 }
-DEFAULT_MODEL = 'llama3'
+DEFAULT_MODEL = 'llama3.1'
+
+TOOLS = [DIARY_LIST, DIARY_CREATE, DIARY_ENTRY_LIST, DIARY_ENTRY_CREATE]
+TOOLS = [{'type': 'function', 'function': t} for t in TOOLS]
 
 def start_session(webhook=None):
     sessions = zap.show_all_sessions()
@@ -35,14 +41,28 @@ def start_session(webhook=None):
     return True
 
 def got_chat(user, text, t):
-    messages = _get_messages_history_and_maybe_reset_and_notify_user(user)
+    sysprompt = """
+Você é o Jarbas. Um assistente virtual funcionando dentro de uma conversa do whatsapp.
+Além de ser um assistente útil, você tem a capacidade de ajudar o seu cliente a lembrar de coisas,
+usando as funções disponíveis para manipular diários e registros.
+"""
+    messages = _get_messages_history_and_maybe_reset_and_notify_user(user, sysprompt)
     user_timestamp = datetime.fromtimestamp(t)
     messages.append({"role": "user", "content": text, "timestamp": user_timestamp})
-    agent_msg = llm.chat_completions_ollama([{"role": m['role'], "content": m['content']} for m in messages], model=_get_model_for(user))
+    llm_messages = [{"role": m['role'], "content": m['content']} for m in messages]
+    # agent_msg = llm.chat_completions_ollama(llm_messages, model=_get_model_for(user))
+    with dbsession() as db:
+        messages_replied = llm.chat_completions_ollama_functions(
+            llm_messages, 
+            tools=TOOLS, 
+            tool_caller=JarbasToolCaller(user, db), 
+            model=_get_model_for(user)
+        )
+    agent_msg = messages_replied[-1]
     reply = agent_msg['content']
     zap.send_message('jarbas', GLOBAL['token'], user, reply)
     agent_msg["timestamp"] = datetime.now()
-    messages.append(agent_msg)
+    messages.extend(messages_replied)
 
 def got_group_chat(groupfrom, msgfrom, senderName, text, t):
     zap_messages = zap.get_messages('jarbas', GLOBAL['token'], groupfrom, 10)
@@ -95,12 +115,13 @@ def got_audio(user, audio_base64, t):
     got_chat(user, text, t)
 
 
-def _get_messages_history_and_maybe_reset_and_notify_user(user):
-    messages = GLOBAL["history"].setdefault(user, [])
+def _get_messages_history_and_maybe_reset_and_notify_user(user, sysprompt):
+    sysmessage = {"role": "system", "content": sysprompt, "timestamp": datetime.now()}
+    messages = GLOBAL["history"].setdefault(user, [sysmessage])
     if len(messages) > 0:
         last_msg = messages[-1]
         if datetime.now() - last_msg["timestamp"] > timedelta(hours=3):
-            messages = []
+            messages = [{"role": "system", "content": sysprompt}]
             GLOBAL["history"][user] = messages
             zap.send_message('jarbas', GLOBAL['token'], user, "context reset after 3h+ of inactivity")
     return messages
@@ -112,3 +133,34 @@ def saveToFile(base64_string, path):
     image_data = base64.b64decode(base64_string)
     with open(path, 'wb') as file:
         file.write(image_data)
+
+class JarbasToolCaller:
+    def __init__(self, user, db):
+        self.user = user
+        self.db = db
+
+    def call(self, tool_call):
+        kwargs = {
+            'user_id': self.user,
+            'db': self.db,
+        }
+        function_name = tool_call['function']['name']
+        arguments = tool_call['function']['arguments']
+        kwargs.update(tool_call['function']['arguments'])
+
+        try:
+            if function_name == 'diary_list':
+                result = jarbas_actions.diary_list(**kwargs)
+            elif function_name == 'diary_create':
+                result = jarbas_actions.diary_create(**kwargs)
+            elif function_name == 'diary_entry_list':
+                result = jarbas_actions.diary_entry_list(**kwargs)
+            elif function_name == 'diary_entry_create':
+                result = jarbas_actions.diary_entry_create(**kwargs)
+            else:
+                raise ValueError(f"Unknown function: {function_name}")
+            zap.send_message('jarbas', GLOBAL['token'], self.user, f"Called function succesfully: {function_name}({json.dumps(arguments)})")
+        except Exception as e:
+            result = {'error': str(e)}
+            zap.send_message('jarbas', GLOBAL['token'], self.user, f"Called function with error: {function_name}({json.dumps(arguments)}) = {str(e)}")
+        return result

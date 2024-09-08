@@ -2,11 +2,18 @@ import requests
 import os
 import json
 import logging
+import ollama
 logger = logging.getLogger(__name__)
+from datetime import datetime
 
 
 # BASE_URL = os.getenv('LLM_BASE_URL', 'http://localhost:1234') # LM studio
 BASE_URL = os.getenv('LLM_BASE_URL', 'http://localhost:11434') # ollama
+
+def json_serial(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Type {type(obj)} not serializable")
 
 def get_models():
     return _get('v1/models')
@@ -14,10 +21,24 @@ def get_models():
 def chat_completions(messages, model='default-model'):
     return _post('v1/chat/completions', messages=messages, model=model)
 
-def chat_completions_ollama(messages, model='llama3'):
+def chat_completions_ollama(messages, model='llama3.1'):
     r = _post('api/chat', messages=messages, model=model, stream=False)
     logger.info(f"PROMPTING {model}:\n{json.dumps(messages, indent=2)}\n\n\nREPLY_LLM\n{r['message']['content']}")
     return r['message']
+
+def chat_completions_ollama_functions(messages, tools, tool_caller, model='llama3.1'):
+    messages = messages[:]
+    size_in = len(messages)
+    client = ollama.Client()
+    while True:
+        response = client.chat(model=model, messages=messages, tools=tools)
+        messages.append(response['message'])
+        if not response['message'].get('tool_calls'):
+            break
+        for tool in response['message']['tool_calls']:
+            fnresponse = tool_caller.call(tool)
+            messages.append({'role': 'tool', 'content': json.dumps(fnresponse, default=json_serial)})
+    return messages[size_in:]
 
 def embeddings(input_text, model='default-model'):
     return _post('v1/embeddings', input=input_text, model=model)
