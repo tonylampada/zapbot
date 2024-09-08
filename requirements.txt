@@ -93,7 +93,6 @@ nvidia-nccl-cu12==2.20.5
 nvidia-nvjitlink-cu12==12.6.68
 nvidia-nvtx-cu12==12.1.105
 ollama==0.3.2
--e git+https://github.com/OpenInterpreter/open-interpreter.git@25eceb85e0cc5dda2b8bdfa91d3017af959505d8#egg=open_interpreter
 openai==1.41.0
 openai-whisper==20231117
 packaging==24.1
