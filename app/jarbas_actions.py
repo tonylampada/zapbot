@@ -15,6 +15,8 @@ def diary_list(user_id: str, db: Session):
     diaries = db.query(Diary).filter(Diary.user_id == user_id).all()
     return [{"id": diary.id, "name": diary.name, "description": diary.description} for diary in diaries]
 
+from sqlalchemy.exc import SQLAlchemyError
+
 def diary_create(user_id: str, name: str, description: str, db: Session):
     """
     Create a new diary for a user.
@@ -27,12 +29,19 @@ def diary_create(user_id: str, name: str, description: str, db: Session):
 
     Returns:
         dict: A dictionary containing the newly created diary information.
+
+    Raises:
+        ValueError: If there's an error creating the diary.
     """
-    new_diary = Diary(user_id=user_id, name=name, description=description)
-    db.add(new_diary)
-    db.commit()
-    db.refresh(new_diary)
-    return {"id": new_diary.id, "name": new_diary.name, "description": new_diary.description}
+    try:
+        new_diary = Diary(user_id=user_id, name=name, description=description)
+        db.add(new_diary)
+        db.commit()
+        db.refresh(new_diary)
+        return {"id": new_diary.id, "name": new_diary.name, "description": new_diary.description}
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise ValueError(f"Error creating diary: {str(e)}")
 
 def diary_entry_list(user_id: str, diary_id: int, db: Session):
     """
