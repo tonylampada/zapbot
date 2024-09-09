@@ -8,3 +8,4 @@ __pycache__
 x.png
 data/
 sql_app.db
+.aider*
