@@ -149,11 +149,13 @@ class JarbasToolCaller:
             'user_id': self.user,
             'db': self.db,
         }
-        function_name = tool_call['function']['name']
-        arguments = tool_call['function']['arguments']
-        kwargs.update(tool_call['function']['arguments'])
-
         try:
+            function_name = tool_call['function']['name']
+            arguments = tool_call['function']['arguments']
+            for k in kwargs:
+                if k in arguments:
+                    raise ValueError(f"invalid parameter {k}")
+            kwargs.update(arguments)
             if function_name == 'diary_list':
                 result = jarbas_actions.diary_list(**kwargs)
             elif function_name == 'diary_create':
