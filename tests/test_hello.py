@@ -1,28 +1,3 @@
-import sys
-import os
-import pytest
-from fastapi.testclient import TestClient
-
-# Add the parent directory of 'tests' to sys.path
-# print(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
-
-from app.main import app
-
-client = TestClient(app)
-
-import pytest
-from fastapi.testclient import TestClient
-from main import app
-# from database import get_db
-
-@pytest.fixture(scope="module")
-def testapp():
-    # app.dependency_overrides[get_db] = override_get_db
-    client = TestClient(app)
-    yield client
-    app.dependency_overrides.clear()
-
 def test_read_root(testapp):
     response = testapp.get("/")
     assert response.status_code == 200
