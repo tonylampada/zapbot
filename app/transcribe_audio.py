@@ -1,11 +1,9 @@
-import base64
-import whisper
-import os
-import uuid
-from pydub import AudioSegment
-
-
 def transcribe(base64_audio):
+    import base64
+    import whisper
+    import os
+    import uuid
+    from pydub import AudioSegment
     # Generate a random filename
     temp_filename = f"/tmp/{uuid.uuid4()}"
     ogg_file = f"{temp_filename}.ogg"

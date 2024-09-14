@@ -76,7 +76,8 @@ def get_flight_times(departure: str, arrival: str) -> str:
 
 def main():
     question = "What is the flight time from New York (NYC) to Los Angeles (LAX)?"
-    run('llama3.1', question)
+    # run('llama3.1', question)
+    run('mistral-nemo', question)
 
 if __name__ == '__main__':
     main()
