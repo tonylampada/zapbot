@@ -24,6 +24,33 @@ DEFAULT_MODEL = 'llama3.1'
 TOOLS = [DIARY_LIST, DIARY_CREATE, DIARY_ENTRY_LIST, DIARY_ENTRY_CREATE]
 TOOLS = [{'type': 'function', 'function': t} for t in TOOLS]
 
+SYSPROMPT_DIARY_AGENT = """
+Você é o Jarbas. Um assistente virtual funcionando dentro de uma conversa do whatsapp.
+Além de ser um assistente útil, você tem a capacidade de ajudar o seu cliente a lembrar de coisas,
+usando as funções disponíveis para manipular diários e registros.
+O usuário pode ter diários diferente e, pra ganhar tempo, ao iniciar uma conversa você 
+já deve usar a função diary_list pra saber a lista dos diarios e seus IDs.
+O caso mais frequente é anotar coisas em algum diário usando a função diary_entry_create.
+Também pode ser comum o usuário pedir pra vc fazer algum tipo de análise baseado em registros existentes.
+Antes de criar um novo diário com a função diary_create vc deve sempre confirmar com o usuário.
+"""
+
+SYSPROMPT_GROUP_AGENT = """
+Você é o Jarbas. Um assistente virtual funcionando dentro de um grupo do whatsapp.
+Quando solicitado, você deve dar uma resposta.
+Mas normalmente você não precisa se envolver na conversa, responda apenas quando vc for chamado pelo nome.
+Eu vou te mandar o historico recente do grupo, e vc decide se quer responder ou não.
+"""
+
+HELP_TEXT = """COMMANDS
+-------------
+/help - Shows this message
+/model - Shows available models
+/model <model> - Sets the model to use
+/agent - Shows available agents
+/agent <agent> - Sets the agent to use
+"""
+
 def start_session(webhook=None):
     sessions = zap.show_all_sessions()
     logger.info(f"sessions: {sessions}")
@@ -41,17 +68,9 @@ def start_session(webhook=None):
     return True
 
 def got_chat(user, text, t):
-    sysprompt = """
-Você é o Jarbas. Um assistente virtual funcionando dentro de uma conversa do whatsapp.
-Além de ser um assistente útil, você tem a capacidade de ajudar o seu cliente a lembrar de coisas,
-usando as funções disponíveis para manipular diários e registros.
-O usuário pode ter diários diferente e, pra ganhar tempo, ao iniciar uma conversa você 
-já deve usar a função diary_list pra saber a lista dos diarios e seus IDs.
-O caso mais frequente é anotar coisas em algum diário usando a função diary_entry_create.
-Também pode ser comum o usuário pedir pra vc fazer algum tipo de análise baseado em registros existentes.
-Antes de criar um novo diário com a função diary_create vc deve sempre confirmar com o usuário.
-"""
-    messages = _get_messages_history_and_maybe_reset_and_notify_user(user, sysprompt)
+    if _is_command(text):
+        return _handle_command(user, text)
+    messages = _get_messages_history_and_maybe_reset_and_notify_user(user, SYSPROMPT_DIARY_AGENT)
     user_timestamp = datetime.fromtimestamp(t)
     messages.append({"role": "user", "content": text, "timestamp": user_timestamp})
     llm_messages = [{"role": m['role'], "content": m['content']} for m in messages]
@@ -79,13 +98,7 @@ def _get_model_for(user):
     return MODEL_OVERRIDES.get(user) or DEFAULT_MODEL
 
 def _get_group_reply(zap_messages):
-    sysprompt = """
-Você é o Jarbas. Um assistente virtual funcionando dentro de um grupo do whatsapp.
-Quando solicitado, você deve dar uma resposta.
-Mas normalmente você não precisa se envolver na conversa, responda apenas quando vc for chamado pelo nome.
-Eu vou te mandar o historico recente do grupo, e vc decide se quer responder ou não.
-"""
-    messages = [{"role": "system", "content": sysprompt}]
+    messages = [{"role": "system", "content": SYSPROMPT_GROUP_AGENT}]
     last_message = zap_messages[-1]
     zap_messages = zap_messages[:-1]
 
@@ -131,6 +144,14 @@ def _get_messages_history_and_maybe_reset_and_notify_user(user, sysprompt):
             zap.send_message('jarbas', GLOBAL['token'], user, "context reset after 3h+ of inactivity")
     return messages
 
+def _is_command(text):
+    text = text.strip()
+    return text.startswith('/help') or text.startswith('/model') or text.startswith('/agent')
+
+def _handle_command(user, command):
+    if command.startswith('/help'):
+        zap.send_message('jarbas', GLOBAL['token'], user, HELP_TEXT)
+        return 
 
 def saveToFile(base64_string, path):
     if base64_string.startswith('data:image/png;base64,'):
