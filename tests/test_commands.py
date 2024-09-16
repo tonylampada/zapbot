@@ -62,6 +62,8 @@ def test_list_and_set_agent(testapp, mock_send_message):
 *2 - diario
 """
     assert replies[0] == expected_message
+    replies = helper.zapmsg(testapp, mock_send_message, "Bom dia. Quais sao os meus diarios?")
+    assert len(replies) == 2
 
 
 def test_reset(testapp, mock_send_message):
@@ -75,5 +77,5 @@ def test_reset(testapp, mock_send_message):
     assert replies[2] == "Memória da conversa apagada"
     replies += helper.zapmsg(testapp, mock_send_message, "Outra")
     assert len(replies) == 4
-    # assert replies[0] nao eh uma piada
+    # assert replies[3] nao eh uma piada
 
