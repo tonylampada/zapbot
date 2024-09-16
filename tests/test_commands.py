@@ -10,6 +10,7 @@ def test_help(testapp, mock_send_message):
 /model <model_id> - Sets the model to use
 /agent - Shows available agents
 /agent <agent_id> - Sets the agent to use
+/reset - Clears chat memory
 """
     assert replies[0] == expected_message
 
@@ -61,3 +62,18 @@ def test_list_and_set_agent(testapp, mock_send_message):
 *2 - diario
 """
     assert replies[0] == expected_message
+
+
+def test_reset(testapp, mock_send_message):
+    replies = []
+    replies += helper.zapmsg(testapp, mock_send_message, "Conta uma piada")
+    assert len(replies) == 1
+    replies += helper.zapmsg(testapp, mock_send_message, "Outra")
+    assert len(replies) == 2
+    replies += helper.zapmsg(testapp, mock_send_message, "/reset")
+    assert len(replies) == 3
+    assert replies[2] == "Memória da conversa apagada"
+    replies += helper.zapmsg(testapp, mock_send_message, "Outra")
+    assert len(replies) == 4
+    # assert replies[0] nao eh uma piada
+

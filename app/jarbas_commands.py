@@ -7,11 +7,12 @@ HELP_TEXT = """COMMANDS
 /model <model_id> - Sets the model to use
 /agent - Shows available agents
 /agent <agent_id> - Sets the agent to use
+/reset - Clears chat memory
 """
 
 def is_command(text):
     text = text.strip()
-    return text.startswith('/help') or text.startswith('/model') or text.startswith('/agent')
+    return text.startswith('/help') or text.startswith('/model') or text.startswith('/agent') or text.startswith('/reset')
 
 def handle_command(user, command):
     try:
@@ -21,6 +22,8 @@ def handle_command(user, command):
             return _handle_model(user, command)
         elif command.startswith('/agent'):
             return _handle_agent(user, command)
+        elif command.startswith('/reset'):
+            return _handle_reset(user)
     except ValueError as e:
         zap.send_message('jarbas', user, f"COMMAND ERROR: {e}")
 
@@ -49,6 +52,12 @@ def _handle_agent(user, command):
         jarbasAgents.setfor(user, available_agents[agent_idx])
     zap.send_message('jarbas', user, _list_agents(user))
 
+def _handle_reset(user):
+    from jarbas_agents import chatMemory
+    from jarbas import jarbasAgents
+    agent = jarbasAgents.getfor(user)
+    chatMemory.reset(user, agent.sysprompt)
+    zap.send_message('jarbas', user, "Memória da conversa apagada")
 
 def _list_models(user):
     from jarbas import jarbasModels
