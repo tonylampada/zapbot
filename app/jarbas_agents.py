@@ -86,11 +86,14 @@ class JarbasToolCaller:
                 result = jarbas_actions.diary_entry_create(**kwargs)
             else:
                 raise ValueError(f"Unknown function: {function_name}")
-            zap.send_message('jarbas', self.user, f"Called function succesfully: {function_name}({json.dumps(arguments)})")
+            zap.send_message('jarbas', self.user, f"Called function succesfully: {function_name}({_strargs(arguments)})")
         except Exception as e:
             result = {'error': str(e)}
-            zap.send_message('jarbas', self.user, f"Called function with error: {function_name}({json.dumps(arguments)}) = {str(e)}")
+            zap.send_message('jarbas', self.user, f"Called function with error: {function_name}({_strargs(arguments)}) = {str(e)}")
         return result
+
+def _strargs(kwargs):
+    return ", ".join([f"{k}={v}" for k, v in kwargs.items()])
 
 SYSPROMPT_DIARY_AGENT = """
 Você é o Jarbas. Um assistente virtual funcionando dentro de uma conversa do whatsapp.
