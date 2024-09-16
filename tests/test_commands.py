@@ -38,3 +38,26 @@ def test_list_and_set_model(testapp, mock_send_message):
 *3 - mistral-nemo
 """
     assert replies[0] == expected_message
+
+def test_list_and_set_agent(testapp, mock_send_message):
+    replies = helper.zapmsg(testapp, mock_send_message, "/agent")
+    expected_message = """AGENTS
+-------------
+*1 - jarbas
+ 2 - diario
+"""
+    assert replies[0] == expected_message
+    replies = helper.zapmsg(testapp, mock_send_message, "/agent 2")
+    expected_message = """AGENTS
+-------------
+ 1 - jarbas
+*2 - diario
+"""
+    assert replies[0] == expected_message
+    replies = helper.zapmsg(testapp, mock_send_message, "/agent")
+    expected_message = """AGENTS
+-------------
+ 1 - jarbas
+*2 - diario
+"""
+    assert replies[0] == expected_message

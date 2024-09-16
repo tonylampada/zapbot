@@ -43,7 +43,7 @@ class JarbasAgents:
     def setfor(self, user, model):
         self.overrides[user] = model
     
-    def models(self):
+    def agents(self):
         return self.available
 
 jarbasModels = JarbasModels()

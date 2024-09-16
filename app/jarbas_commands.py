@@ -14,22 +14,41 @@ def is_command(text):
     return text.startswith('/help') or text.startswith('/model') or text.startswith('/agent')
 
 def handle_command(user, command):
-    from jarbas import jarbasModels
     try:
         if command.startswith('/help'):
-            zap.send_message('jarbas', user, HELP_TEXT)
-            return
+            return _handle_help(user)
         elif command.startswith('/model'):
-            model_id = _cmd_arg(command, 1, int)
-            available_models = jarbasModels.models()
-            if model_id is not None:
-                model_idx = model_id - 1
-                if not 0 < model_idx < len(available_models):
-                    raise ValueError(f"Invalid model id {model_id}")
-                jarbasModels.setfor(user, available_models[model_idx])
-            zap.send_message('jarbas', user, _list_models(user))
+            return _handle_model(user, command)
+        elif command.startswith('/agent'):
+            return _handle_agent(user, command)
     except ValueError as e:
         zap.send_message('jarbas', user, f"COMMAND ERROR: {e}")
+
+def _handle_help(user):
+    zap.send_message('jarbas', user, HELP_TEXT)
+
+def _handle_model(user, command):
+    from jarbas import jarbasModels
+    model_id = _cmd_arg(command, 1, int)
+    available_models = jarbasModels.models()
+    if model_id is not None:
+        model_idx = model_id - 1
+        if not 0 < model_idx < len(available_models):
+            raise ValueError(f"Invalid model id {model_id}")
+        jarbasModels.setfor(user, available_models[model_idx])
+    zap.send_message('jarbas', user, _list_models(user))
+
+def _handle_agent(user, command):
+    from jarbas import jarbasAgents
+    agent_id = _cmd_arg(command, 1, int)
+    available_agents = jarbasAgents.agents()
+    if agent_id is not None:
+        agent_idx = agent_id - 1
+        if not 0 < agent_idx < len(available_agents):
+            raise ValueError(f"Invalid agent id {agent_id}")
+        jarbasAgents.setfor(user, available_agents[agent_idx])
+    zap.send_message('jarbas', user, _list_agents(user))
+
 
 def _list_models(user):
     from jarbas import jarbasModels
@@ -38,7 +57,15 @@ def _list_models(user):
         prefix = "*" if m == jarbasModels.getfor(user) else " "
         reply += f"{prefix}{i+1} - {m}\n"
     return reply
-            
+
+def _list_agents(user):
+    from jarbas import jarbasAgents
+    reply = "AGENTS\n-------------\n"
+    for i, a in enumerate(jarbasAgents.agents()):
+        prefix = "*" if a == jarbasAgents.getfor(user) else " "
+        reply += f"{prefix}{i+1} - {a.name}\n"
+    return reply
+
 def _cmd_arg(command, pos, convert=None):
     parts = command.split()
     if len(parts) <= pos:

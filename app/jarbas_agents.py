@@ -112,5 +112,5 @@ Trata seu usuário com uma certa intimidade, bota um emoji de vez em quando.
 
 chatMemory = ChatMemory()
 jarbas_agent = Agent('jarbas', SYSPROMPT_JARBAS_AGENT, tools=None)
-diary_agent = Agent('diary', SYSPROMPT_DIARY_AGENT, [DIARY_LIST, DIARY_CREATE, DIARY_ENTRY_LIST, DIARY_ENTRY_CREATE])
+diary_agent = Agent('diario', SYSPROMPT_DIARY_AGENT, [DIARY_LIST, DIARY_CREATE, DIARY_ENTRY_LIST, DIARY_ENTRY_CREATE])
 
