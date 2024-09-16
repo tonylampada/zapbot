@@ -6,7 +6,7 @@ import logging
 from database import dbsession
 logger = logging.getLogger(__name__)
 import jarbas_commands
-from jarbas_agents import diary_agent
+from jarbas_agents import diary_agent, jarbas_agent
 
 
 SYSPROMPT_GROUP_AGENT = """
@@ -27,6 +27,19 @@ class JarbasModels:
     def getfor(self, user):
         return self.overrides.get(user) or self.default
     
+    def setfor(self, user, agent):
+        self.overrides[user] = agent
+    
+    def models(self):
+        return self.available
+
+class JarbasAgents:
+    default = jarbas_agent
+    available = [jarbas_agent, diary_agent]
+    overrides = {}
+    def getfor(self, user):
+        return self.overrides.get(user) or self.default
+    
     def setfor(self, user, model):
         self.overrides[user] = model
     
@@ -34,11 +47,13 @@ class JarbasModels:
         return self.available
 
 jarbasModels = JarbasModels()
+jarbasAgents = JarbasAgents()
 
 def got_chat(user, text, t):
     if jarbas_commands.is_command(text):
         return jarbas_commands.handle_command(user, text)
-    messages_replied = diary_agent.chat(user, text, t)
+    agent = jarbasAgents.getfor(user)
+    messages_replied = agent.chat(user, text, t)
     reply = messages_replied[-1]['content']
     zap.send_message('jarbas', user, reply)
 

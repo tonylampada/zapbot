@@ -24,9 +24,10 @@ class ChatMemory:
         self.messagehistory[user] = messages
 
 class Agent:
-    def __init__(self, sysprompt, tools):
+    def __init__(self, name, sysprompt, tools):
+        self.name = name
         self.sysprompt = sysprompt
-        self.tools = [{'type': 'function', 'function': t} for t in tools]
+        self.tools = [{'type': 'function', 'function': t} for t in tools] if tools else None
     
     def chat(self, user, text, t):
         from jarbas import jarbasModels
@@ -57,17 +58,6 @@ def _reset(user, sysprompt, zap_reply):
     messages = chatMemory.reset(user, sysprompt)
     zap.send_message('jarbas', user, zap_reply)
     return messages
-
-SYSPROMPT_DIARY_AGENT = """
-Você é o Jarbas. Um assistente virtual funcionando dentro de uma conversa do whatsapp.
-Além de ser um assistente útil, você tem a capacidade de ajudar o seu cliente a lembrar de coisas,
-usando as funções disponíveis para manipular diários e registros.
-O usuário pode ter diários diferente e, pra ganhar tempo, ao iniciar uma conversa você 
-já deve usar a função diary_list pra saber a lista dos diarios e seus IDs.
-O caso mais frequente é anotar coisas em algum diário usando a função diary_entry_create.
-Também pode ser comum o usuário pedir pra vc fazer algum tipo de análise baseado em registros existentes.
-Antes de criar um novo diário com a função diary_create vc deve sempre confirmar com o usuário.
-"""
 
 class JarbasToolCaller:
     def __init__(self, user, db):
@@ -102,6 +92,25 @@ class JarbasToolCaller:
             zap.send_message('jarbas', self.user, f"Called function with error: {function_name}({json.dumps(arguments)}) = {str(e)}")
         return result
 
+SYSPROMPT_DIARY_AGENT = """
+Você é o Jarbas. Um assistente virtual funcionando dentro de uma conversa do whatsapp.
+Além de ser um assistente útil, você tem a capacidade de ajudar o seu cliente a lembrar de coisas,
+usando as funções disponíveis para manipular diários e registros.
+O usuário pode ter diários diferente e, pra ganhar tempo, ao iniciar uma conversa você 
+já deve usar a função diary_list pra saber a lista dos diarios e seus IDs.
+O caso mais frequente é anotar coisas em algum diário usando a função diary_entry_create.
+Também pode ser comum o usuário pedir pra vc fazer algum tipo de análise baseado em registros existentes.
+Antes de criar um novo diário com a função diary_create vc deve sempre confirmar com o usuário.
+"""
+
+SYSPROMPT_JARBAS_AGENT = """
+Você é o Jarbas. Um assistente virtual funcionando dentro de uma conversa do whatsapp.
+Você é um cara gente boa, sempre disposto a ajudar. Tem uma personalidade leve, brincalhona, zoeira.
+Trata seu usuário com uma certa intimidade, bota um emoji de vez em quando.
+"""
+
+
 chatMemory = ChatMemory()
-diary_agent = Agent(SYSPROMPT_DIARY_AGENT, [DIARY_LIST, DIARY_CREATE, DIARY_ENTRY_LIST, DIARY_ENTRY_CREATE])
+jarbas_agent = Agent('jarbas', SYSPROMPT_JARBAS_AGENT, tools=None)
+diary_agent = Agent('diary', SYSPROMPT_DIARY_AGENT, [DIARY_LIST, DIARY_CREATE, DIARY_ENTRY_LIST, DIARY_ENTRY_CREATE])
 
