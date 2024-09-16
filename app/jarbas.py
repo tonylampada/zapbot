@@ -14,12 +14,13 @@ GLOBAL = {
     "history": {}
 }
 
-MODEL_OVERRIDES = {
-    '5512981440013@c.us': 'llama3.1',
-    '5512981812300@c.us': 'llama3.1',
-    '5512988653063@c.us': 'llama3.1',
-}
+MODEL_OVERRIDES = {}
 DEFAULT_MODEL = 'llama3.1'
+AVAILABLE_MODELS = [
+    "llama3.1",
+    "dolphin-llama3",
+    "mistral-nemo",
+]
 
 TOOLS = [DIARY_LIST, DIARY_CREATE, DIARY_ENTRY_LIST, DIARY_ENTRY_CREATE]
 TOOLS = [{'type': 'function', 'function': t} for t in TOOLS]
@@ -149,9 +150,40 @@ def _is_command(text):
     return text.startswith('/help') or text.startswith('/model') or text.startswith('/agent')
 
 def _handle_command(user, command):
-    if command.startswith('/help'):
-        zap.send_message('jarbas', GLOBAL['token'], user, HELP_TEXT)
-        return 
+    try:
+        if command.startswith('/help'):
+            zap.send_message('jarbas', GLOBAL['token'], user, HELP_TEXT)
+            return
+        elif command.startswith('/model'):
+            model_id = _cmd_arg(command, 1, int)
+            if model_id is not None:
+                model_idx = model_id - 1
+                if not 0 < model_idx < len(AVAILABLE_MODELS):
+                    raise ValueError(f"Invalid model id {model_id}")
+                MODEL_OVERRIDES[user] = AVAILABLE_MODELS[model_idx]
+            zap.send_message('jarbas', GLOBAL['token'], user, _list_models(user))
+    except ValueError as e:
+        zap.send_message('jarbas', GLOBAL['token'], user, f"COMMAND ERROR: {e}")
+
+            
+def _list_models(user):
+    reply = "MODELS\n-------------\n"
+    for i, m in enumerate(AVAILABLE_MODELS):
+        prefix = "*" if m == _get_model_for(user) else " "
+        reply += f"{prefix}{i+1} - {m}\n"
+    return reply
+            
+def _cmd_arg(command, pos, convert=None):
+    parts = command.split()
+    if len(parts) <= pos:
+        return None
+    arg = parts[pos]
+    if convert:
+        try:
+            arg = convert(arg)
+        except Exception as e:
+            raise ValueError(f"Invalid argument {arg} on position {pos}. Expected {convert}")
+    return arg
 
 def saveToFile(base64_string, path):
     if base64_string.startswith('data:image/png;base64,'):
