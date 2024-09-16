@@ -8,18 +8,11 @@ from database import dbsession
 logger = logging.getLogger(__name__)
 from jarbas_actions import DIARY_LIST, DIARY_CREATE, DIARY_ENTRY_LIST, DIARY_ENTRY_CREATE
 import jarbas_actions
+import jarbas_commands
 
 GLOBAL = {
     "history": {}
 }
-
-MODEL_OVERRIDES = {}
-DEFAULT_MODEL = 'llama3.1'
-AVAILABLE_MODELS = [
-    "llama3.1",
-    "dolphin-llama3",
-    "mistral-nemo",
-]
 
 TOOLS = [DIARY_LIST, DIARY_CREATE, DIARY_ENTRY_LIST, DIARY_ENTRY_CREATE]
 TOOLS = [{'type': 'function', 'function': t} for t in TOOLS]
@@ -42,29 +35,38 @@ Mas normalmente você não precisa se envolver na conversa, responda apenas quan
 Eu vou te mandar o historico recente do grupo, e vc decide se quer responder ou não.
 """
 
-HELP_TEXT = """COMMANDS
--------------
-/help - Shows this message
-/model - Shows available models
-/model <model_id> - Sets the model to use
-/agent - Shows available agents
-/agent <agent_id> - Sets the agent to use
-"""
+class JarbasModels:
+    default = 'llama3.1'
+    available = [
+        "llama3.1",
+        "dolphin-llama3",
+        "mistral-nemo",
+    ]
+    overrides = {}
+    def getfor(self, user):
+        return self.overrides.get(user) or self.default
+    
+    def setfor(self, user, model):
+        self.overrides[user] = model
+    
+    def models(self):
+        return self.available
+
+jarbasModels = JarbasModels()
 
 def got_chat(user, text, t):
-    if _is_command(text):
-        return _handle_command(user, text)
+    if jarbas_commands.is_command(text):
+        return jarbas_commands.handle_command(user, text)
     messages = _get_messages_history_and_maybe_reset_and_notify_user(user, SYSPROMPT_DIARY_AGENT)
     user_timestamp = datetime.fromtimestamp(t)
     messages.append({"role": "user", "content": text, "timestamp": user_timestamp})
     llm_messages = [{"role": m['role'], "content": m['content']} for m in messages]
-    # agent_msg = llm.chat_completions_ollama(llm_messages, model=_get_model_for(user))
     with dbsession() as db:
         messages_replied = llm.chat_completions_ollama_functions(
             llm_messages, 
             tools=TOOLS, 
             tool_caller=JarbasToolCaller(user, db), 
-            model=_get_model_for(user)
+            model=jarbasModels.getfor(user)
         )
     agent_msg = messages_replied[-1]
     reply = agent_msg['content']
@@ -77,9 +79,6 @@ def got_group_chat(groupfrom, msgfrom, senderName, text, t):
     reply_llm = _get_group_reply(zap_messages)
     if reply_llm:
         zap.send_group_message('jarbas', groupfrom, reply_llm)
-
-def _get_model_for(user):
-    return MODEL_OVERRIDES.get(user) or DEFAULT_MODEL
 
 def _get_group_reply(zap_messages):
     messages = [{"role": "system", "content": SYSPROMPT_GROUP_AGENT}]
@@ -109,13 +108,11 @@ def _get_group_reply(zap_messages):
     reply_llm = llm.chat_completions_ollama(messages, model="llama3")
     return reply_llm['content']
 
-
 def got_audio(user, audio_base64, t):
     zap.send_message('jarbas', user, "Transcribing audio. Please wait...")
     text = transcribe_audio.transcribe(audio_base64)
     zap.send_message('jarbas', user, "TRANSCRIBED AUDIO\n--------------\n"+text)
     got_chat(user, text, t)
-
 
 def _get_messages_history_and_maybe_reset_and_notify_user(user, sysprompt):
     sysmessage = {"role": "system", "content": sysprompt, "timestamp": datetime.now()}
@@ -127,47 +124,6 @@ def _get_messages_history_and_maybe_reset_and_notify_user(user, sysprompt):
             GLOBAL["history"][user] = messages
             zap.send_message('jarbas', user, "context reset after 3h+ of inactivity")
     return messages
-
-def _is_command(text):
-    text = text.strip()
-    return text.startswith('/help') or text.startswith('/model') or text.startswith('/agent')
-
-def _handle_command(user, command):
-    try:
-        if command.startswith('/help'):
-            zap.send_message('jarbas', user, HELP_TEXT)
-            return
-        elif command.startswith('/model'):
-            model_id = _cmd_arg(command, 1, int)
-            if model_id is not None:
-                model_idx = model_id - 1
-                if not 0 < model_idx < len(AVAILABLE_MODELS):
-                    raise ValueError(f"Invalid model id {model_id}")
-                MODEL_OVERRIDES[user] = AVAILABLE_MODELS[model_idx]
-            zap.send_message('jarbas', user, _list_models(user))
-    except ValueError as e:
-        zap.send_message('jarbas', user, f"COMMAND ERROR: {e}")
-
-            
-def _list_models(user):
-    reply = "MODELS\n-------------\n"
-    for i, m in enumerate(AVAILABLE_MODELS):
-        prefix = "*" if m == _get_model_for(user) else " "
-        reply += f"{prefix}{i+1} - {m}\n"
-    return reply
-            
-def _cmd_arg(command, pos, convert=None):
-    parts = command.split()
-    if len(parts) <= pos:
-        return None
-    arg = parts[pos]
-    if convert:
-        try:
-            arg = convert(arg)
-        except Exception as e:
-            raise ValueError(f"Invalid argument {arg} on position {pos}. Expected {convert}")
-    return arg
-
 class JarbasToolCaller:
     def __init__(self, user, db):
         self.user = user
