@@ -6,6 +6,7 @@ setup_logging()
 
 from fastapi import FastAPI, Request
 import jarbas
+import zap
 import logging
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ async def got_zap(request: Request):
 
 def main():
     logger.info("Iniciando a aplicação")
-    if not jarbas.start_session(webhook='http://172.17.0.1:8000/zap'):
+    if not zap.start_session('jarbas', webhook='http://172.17.0.1:8000/zap'):
         logger.error("Falha ao iniciar a sessão do Jarbas")
         return
     import uvicorn

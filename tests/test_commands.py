@@ -9,7 +9,7 @@ def test_help(testapp, mock_send_message):
 /model - Shows available models
 /model <model_id> - Sets the model to use
 /agent - Shows available agents
-/agent <agent> - Sets the agent to use
+/agent <agent_id> - Sets the agent to use
 """
     assert replies[0] == expected_message
 

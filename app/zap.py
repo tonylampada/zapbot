@@ -1,10 +1,33 @@
 import requests
 import os
+import base64
+import logging
+logger = logging.getLogger(__name__)
 
 BASE_URL = os.getenv('WPPCONNECT_BASE_URL', 'http://localhost:21465')
 SECRET_KEY = os.getenv('WPPCONNECT_SECRET_KEY')
 
-def generate_token(sessionName):
+TOKENS = {}
+
+def start_session(sessionName, webhook=None):
+    if TOKENS.get(sessionName):
+        return True
+    sessions = _show_all_sessions()
+    logger.info(f"sessions: {sessions}")
+    token = _generate_token(sessionName)
+    logger.info(f"token: {token}")
+    status = _status_session(sessionName, token)
+    logger.info(f"status: {status}")
+    if status != 'CONNECTED':
+        newsession = _start_session(sessionName, token, webhook)
+        qrcode = newsession['qrcode']
+        _saveToFile(qrcode, './data/qrcode.png')
+        logger.info("saved qrcode")
+        return False
+    TOKENS[sessionName] = token
+    return True
+
+def _generate_token(sessionName):
     url = f"{BASE_URL}/api/{sessionName}/{SECRET_KEY}/generate-token"
     response = requests.post(url)
     if response.status_code == 201:
@@ -13,28 +36,28 @@ def generate_token(sessionName):
     else:
         raise Exception(f"Failed to generate token. Status code: {response.status_code} {response.json()}")
 
-def show_all_sessions():
+def _show_all_sessions():
     r = _get(f'{SECRET_KEY}/show-all-sessions')
     return r['response']
 
-def status_session(sessionName, token):
+def _status_session(sessionName, token):
     r = _get(f'{sessionName}/status-session', token)
     return r['status']
 
-def start_session(sessionName, token, webhook=None):
+def _start_session(sessionName, token, webhook=None):
     return _post('start-session', sessionName, token, waitQrCode=True, webhook=webhook)
 
-def send_message(sessionName, token, phone, message):
-    return _post('send-message', sessionName, token, expectCode=201, phone=phone, message=message, isGroup=False, isNewsletter=False)
+def send_message(sessionName, phone, message):
+    return _post('send-message', sessionName, TOKENS[sessionName], expectCode=201, phone=phone, message=message, isGroup=False, isNewsletter=False)
 
-def send_group_message(sessionName, token, phone, message):
-    return _post('send-message', sessionName, token, expectCode=201, phone=phone, message=message, isGroup=True, isNewsletter=False)
+def send_group_message(sessionName, phone, message):
+    return _post('send-message', sessionName, TOKENS[sessionName], expectCode=201, phone=phone, message=message, isGroup=True, isNewsletter=False)
 
-def list_chats(sessionName, token, onlyGroups):
-    return _post('list-chats', sessionName, token, onlyGroups=onlyGroups)
+def list_chats(sessionName, onlyGroups):
+    return _post('list-chats', sessionName, TOKENS[sessionName], onlyGroups=onlyGroups)
 
-def get_messages(sessionName, token, phone, count):
-    r = _get(f'{sessionName}/get-messages/{phone}', token, count=count)
+def get_messages(sessionName, phone, count):
+    r = _get(f'{sessionName}/get-messages/{phone}', TOKENS[sessionName], count=count)
     return [{
         "id": o.get("id"),
         "body": o.get("body"),
@@ -73,13 +96,9 @@ def _get(command, token=None, **kwargs):
     else:
         raise Exception(f"Error. Status code: {response.status_code} {response.json()}")
 
-if __name__ == '__main__':
-    import json
-    token = generate_token('jarbas')
-    print("token", token)
-    # r = get_last_messages('jarbas', token, '5512981440013-1574914013', 10)
-    # r = list_chats('jarbas', token, onlyGroups=True)
-    # r = get_messages('jarbas', token, '120363330535830326@g.us', 10)
-    # print("r", json.dumps(r, indent=2))
-    send_group_message('jarbas', token, '120363330535830326@g.us', 'teste')
-    # print("r", json.dumps([f"{o['id']['user']}/{o['contact']['name']}" for o in r], indent=2))
+def _saveToFile(base64_string, path):
+    if base64_string.startswith('data:image/png;base64,'):
+        base64_string = base64_string.split(',')[1]
+    image_data = base64.b64decode(base64_string)
+    with open(path, 'wb') as file:
+        file.write(image_data)

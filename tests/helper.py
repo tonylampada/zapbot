@@ -12,6 +12,6 @@ def zapmsg(testapp, mock_send_message, text):
     response = testapp.post("/zap", json=data)
     assert response.status_code == 200
     assert response.json() == {"status": "OK"}
-    zap_messages = [args[3] for args, kwargs in mock_send_message.call_args_list]
+    zap_messages = [args[2] for args, kwargs in mock_send_message.call_args_list]
     mock_send_message.reset_mock()
     return zap_messages

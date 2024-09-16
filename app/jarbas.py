@@ -1,5 +1,4 @@
 import zap
-import base64
 import llm
 import transcribe_audio
 from datetime import datetime, timedelta
@@ -47,26 +46,10 @@ HELP_TEXT = """COMMANDS
 -------------
 /help - Shows this message
 /model - Shows available models
-/model <model> - Sets the model to use
+/model <model_id> - Sets the model to use
 /agent - Shows available agents
-/agent <agent> - Sets the agent to use
+/agent <agent_id> - Sets the agent to use
 """
-
-def start_session(webhook=None):
-    sessions = zap.show_all_sessions()
-    logger.info(f"sessions: {sessions}")
-    token = zap.generate_token('jarbas')
-    logger.info(f"token: {token}")
-    status = zap.status_session('jarbas', token)
-    logger.info(f"status: {status}")
-    if status != 'CONNECTED':
-        newsession = zap.start_session('jarbas', token, webhook)
-        qrcode = newsession['qrcode']
-        saveToFile(qrcode, './data/qrcode.png')
-        logger.info("saved qrcode")
-        return False
-    GLOBAL['token'] = token
-    return True
 
 def got_chat(user, text, t):
     if _is_command(text):
@@ -85,15 +68,15 @@ def got_chat(user, text, t):
         )
     agent_msg = messages_replied[-1]
     reply = agent_msg['content']
-    zap.send_message('jarbas', GLOBAL['token'], user, reply)
+    zap.send_message('jarbas', user, reply)
     agent_msg["timestamp"] = datetime.now()
     messages.extend(messages_replied)
 
 def got_group_chat(groupfrom, msgfrom, senderName, text, t):
-    zap_messages = zap.get_messages('jarbas', GLOBAL['token'], groupfrom, 10)
+    zap_messages = zap.get_messages('jarbas', groupfrom, 10)
     reply_llm = _get_group_reply(zap_messages)
     if reply_llm:
-        zap.send_group_message('jarbas', GLOBAL['token'], groupfrom, reply_llm)
+        zap.send_group_message('jarbas', groupfrom, reply_llm)
 
 def _get_model_for(user):
     return MODEL_OVERRIDES.get(user) or DEFAULT_MODEL
@@ -128,9 +111,9 @@ def _get_group_reply(zap_messages):
 
 
 def got_audio(user, audio_base64, t):
-    zap.send_message('jarbas', GLOBAL['token'], user, "Transcribing audio. Please wait...")
+    zap.send_message('jarbas', user, "Transcribing audio. Please wait...")
     text = transcribe_audio.transcribe(audio_base64)
-    zap.send_message('jarbas', GLOBAL['token'], user, "TRANSCRIBED AUDIO\n--------------\n"+text)
+    zap.send_message('jarbas', user, "TRANSCRIBED AUDIO\n--------------\n"+text)
     got_chat(user, text, t)
 
 
@@ -142,7 +125,7 @@ def _get_messages_history_and_maybe_reset_and_notify_user(user, sysprompt):
         if datetime.now() - last_msg["timestamp"] > timedelta(hours=3):
             messages = [{"role": "system", "content": sysprompt}]
             GLOBAL["history"][user] = messages
-            zap.send_message('jarbas', GLOBAL['token'], user, "context reset after 3h+ of inactivity")
+            zap.send_message('jarbas', user, "context reset after 3h+ of inactivity")
     return messages
 
 def _is_command(text):
@@ -152,7 +135,7 @@ def _is_command(text):
 def _handle_command(user, command):
     try:
         if command.startswith('/help'):
-            zap.send_message('jarbas', GLOBAL['token'], user, HELP_TEXT)
+            zap.send_message('jarbas', user, HELP_TEXT)
             return
         elif command.startswith('/model'):
             model_id = _cmd_arg(command, 1, int)
@@ -161,9 +144,9 @@ def _handle_command(user, command):
                 if not 0 < model_idx < len(AVAILABLE_MODELS):
                     raise ValueError(f"Invalid model id {model_id}")
                 MODEL_OVERRIDES[user] = AVAILABLE_MODELS[model_idx]
-            zap.send_message('jarbas', GLOBAL['token'], user, _list_models(user))
+            zap.send_message('jarbas', user, _list_models(user))
     except ValueError as e:
-        zap.send_message('jarbas', GLOBAL['token'], user, f"COMMAND ERROR: {e}")
+        zap.send_message('jarbas', user, f"COMMAND ERROR: {e}")
 
             
 def _list_models(user):
@@ -184,13 +167,6 @@ def _cmd_arg(command, pos, convert=None):
         except Exception as e:
             raise ValueError(f"Invalid argument {arg} on position {pos}. Expected {convert}")
     return arg
-
-def saveToFile(base64_string, path):
-    if base64_string.startswith('data:image/png;base64,'):
-        base64_string = base64_string.split(',')[1]
-    image_data = base64.b64decode(base64_string)
-    with open(path, 'wb') as file:
-        file.write(image_data)
 
 class JarbasToolCaller:
     def __init__(self, user, db):
@@ -219,8 +195,8 @@ class JarbasToolCaller:
                 result = jarbas_actions.diary_entry_create(**kwargs)
             else:
                 raise ValueError(f"Unknown function: {function_name}")
-            zap.send_message('jarbas', GLOBAL['token'], self.user, f"Called function succesfully: {function_name}({json.dumps(arguments)})")
+            zap.send_message('jarbas', self.user, f"Called function succesfully: {function_name}({json.dumps(arguments)})")
         except Exception as e:
             result = {'error': str(e)}
-            zap.send_message('jarbas', GLOBAL['token'], self.user, f"Called function with error: {function_name}({json.dumps(arguments)}) = {str(e)}")
+            zap.send_message('jarbas', self.user, f"Called function with error: {function_name}({json.dumps(arguments)}) = {str(e)}")
         return result
