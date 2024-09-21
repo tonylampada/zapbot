@@ -18,7 +18,7 @@ def start_session(sessionName, webhook=None):
     logger.info(f"token: {token}")
     status = _status_session(sessionName, token)
     logger.info(f"status: {status}")
-    if status != 'CONNECTED':
+    if status not in {'CONNECTED', 'INITIALIZING'}:
         newsession = _start_session(sessionName, token, webhook)
         qrcode = newsession['qrcode']
         _saveToFile(qrcode, './data/qrcode.png')

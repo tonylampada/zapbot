@@ -36,7 +36,7 @@ def _handle_model(user, command):
     available_models = jarbasModels.models()
     if model_id is not None:
         model_idx = model_id - 1
-        if not 0 < model_idx < len(available_models):
+        if not 0 <= model_idx < len(available_models):
             raise ValueError(f"Invalid model id {model_id}")
         jarbasModels.setfor(user, available_models[model_idx])
     zap.send_message('jarbas', user, _list_models(user))
@@ -47,7 +47,7 @@ def _handle_agent(user, command):
     available_agents = jarbasAgents.agents()
     if agent_id is not None:
         agent_idx = agent_id - 1
-        if not 0 < agent_idx < len(available_agents):
+        if not 0 <= agent_idx < len(available_agents):
             raise ValueError(f"Invalid agent id {agent_id}")
         jarbasAgents.setfor(user, available_agents[agent_idx])
     zap.send_message('jarbas', user, _list_agents(user))
