@@ -18,7 +18,8 @@ def transcribe(base64_audio):
         audio.export(wav_file, format='wav')
         
         print("loading model...")
-        model = whisper.load_model("base")
+        # model = whisper.load_model("base")
+        model = whisper.load_model("small")
         print("model loaded!")
         
         result = model.transcribe(wav_file)
