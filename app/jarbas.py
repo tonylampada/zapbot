@@ -22,6 +22,7 @@ class JarbasModels:
         "llama3.1",
         "dolphin-llama3",
         "mistral-nemo",
+        "llava-llama3",
     ]
     overrides = {}
     def getfor(self, user):
@@ -49,11 +50,11 @@ class JarbasAgents:
 jarbasModels = JarbasModels()
 jarbasAgents = JarbasAgents()
 
-def got_chat(user, text, t):
+def got_chat(user, text, t, img_base64=None):
     if jarbas_commands.is_command(text):
         return jarbas_commands.handle_command(user, text)
     agent = jarbasAgents.getfor(user)
-    messages_replied = agent.chat(user, text, t)
+    messages_replied = agent.chat(user, text, t, img_base64)
     reply = messages_replied[-1]['content']
     zap.send_message('jarbas', user, reply)
 

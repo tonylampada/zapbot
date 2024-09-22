@@ -30,7 +30,7 @@ class Agent:
         self.sysprompt = sysprompt
         self.tools = [{'type': 'function', 'function': t} for t in tools] if tools else None
     
-    def chat(self, user, text, t):
+    def chat(self, user, text, t, img_base64=None):
         from jarbas import jarbasModels
         with dbsession() as db:
             if isinstance(self.sysprompt, str):
@@ -43,6 +43,8 @@ class Agent:
             user_timestamp = datetime.fromtimestamp(t)
             messages.append({"role": "user", "content": text, "timestamp": user_timestamp})
             llm_input_messages = [{"role": m['role'], "content": m['content']} for m in messages]
+            if img_base64:
+                llm_input_messages[-1]['images'] = [img_base64]
             messages_replied = llm.chat_completions_ollama_functions(
                 llm_input_messages, 
                 tools=self.tools, 

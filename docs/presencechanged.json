@@ -1,0 +1,23 @@
+{
+    "event": "onpresencechanged",
+    "session": "jarbas",
+    "id": "120363020952917697@g.us",
+    "isOnline": false,
+    "isGroup": true,
+    "isUser": false,
+    "shortName": "Terra Plana X Ci\u00eancia  \ud83d\udcd0\ud83d\udcda",
+    "state": "typing",
+    "t": 1727016844231,
+    "participants": [
+      {
+        "id": "5511950200233@c.us",
+        "state": "typing",
+        "shortName": "+55 11 95020-0233"
+      },
+      {
+        "id": "5511959956074@c.us",
+        "state": "unavailable",
+        "shortName": "+55 11 95995-6074"
+      }
+    ]
+  }

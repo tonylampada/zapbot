@@ -7,6 +7,7 @@ setup_logging()
 from fastapi import FastAPI, Request
 import jarbas
 import zap
+import llm
 import logging
 import json
 from datetime import datetime
@@ -28,26 +29,42 @@ async def got_zap(request: Request):
     event = body.get('event')
     isGroup = body.get("isGroupMsg") or (event == 'onrevokedmessage' and body.get('author'))
     msgType = body.get('type')
-    if event == 'onmessage':
+    ignore_events = {'onpresencechanged', 'onparticipantschanged', 'onreactionmessage'}
+    if event in ignore_events:
+        pass
+    elif event == 'onmessage':
         if isGroup:
-            if msgType == 'chat':
+            ignoredTypes = {'ciphertext'}
+            group_id = body['from']
+            message_id = body['id']
+            from_number = body['author']
+            if msgType in ignoredTypes:
+                pass
+            elif msgType == 'chat':
                 groupChat = {
-                    'group_id': body['from'],
-                    'message_id': body['id'],
+                    'group_id': group_id,
+                    'message_id': message_id,
                     'message_type': 'chat',
                     'message_body': body['body'],
-                    'from_number': body['author'],
+                    'from_number': from_number,
                     'from_name': body['notifyName'],
                     'timestamp': datetime.fromtimestamp(body['t']),
                 }
                 zapgroup_svc.save_group_chat(groupChat)
             elif msgType == 'image':
+                try:
+                    imgDescription = _describe_image(body['body'])
+                except Exception as e:
+                    print(f"Error describing image: {e}")
+                    imgDescription = f"[IMG ERROR] {e}"
+                caption = body.get('caption', '')
+                message_body = f"{caption}\n----------- IMAGE -----------\n{imgDescription}"
                 groupChat = {
-                    'group_id': body['from'],
-                    'message_id': body['id'],
+                    'group_id': group_id,
+                    'message_id': message_id,
                     'message_type': 'image',
-                    'message_body': body.get('caption', ''),
-                    'from_number': body['author'],
+                    'message_body': message_body,
+                    'from_number': from_number,
                     'from_name': body['notifyName'],
                     'timestamp': datetime.fromtimestamp(body['t']),
                 }
@@ -60,17 +77,36 @@ async def got_zap(request: Request):
                     logger.error(f"Erro ao transcrever áudio: {e}")
                     transcribed = f"AUDIO TRANSCRIBE ERROR: {e}"
                 groupChat = {
-                    'group_id': body['from'],
-                    'message_id': body['id'],
+                    'group_id': group_id,
+                    'message_id': message_id,
                     'message_type': 'audio',
                     'message_body': transcribed,
-                    'from_number': body['author'],
+                    'from_number': from_number,
                     'from_name': body['notifyName'],
                     'timestamp': datetime.fromtimestamp(body['t']),
                 }
                 zapgroup_svc.save_group_chat(groupChat)
+            elif msgType == 'gp2':
+                msgSubtype = body.get('subtype')
+                if msgSubtype == 'remove':
+                    from_name = body.get('sender', {}).get('pushname', 'UKNKOWN_AUTHOR')
+                    recipient_numbers = ', '.join(body.get('recipients', []))
+                    message_body = f"[ADMIN_ACTION] {from_name} removeu {recipient_numbers}"
+                    groupChat = {
+                        'group_id': group_id,
+                        'message_id': message_id,
+                        'message_type': 'removeuser',
+                        'message_body': message_body,
+                        'from_number': from_number,
+                        'from_name': from_name,
+                        'timestamp': datetime.fromtimestamp(body['t']),
+                    }
+                    zapgroup_svc.save_group_chat(groupChat)
+                else:
+                    print('--- group chat gp2')
+                    print(json.dumps(body, indent=2))
             else:
-                print('--- group chat')
+                print('--- group chat of unknown type')
                 print(json.dumps(body, indent=2))
                 # jarbas.got_group_chat(groupfrom, msgfrom, senderName, text, t)
         else:
@@ -84,6 +120,12 @@ async def got_zap(request: Request):
                 audio_base64 = body['body']
                 t = body['t']
                 jarbas.got_audio(msgfrom, audio_base64, t)
+            elif msgType == 'image':
+                msgfrom = body['from']
+                img_base64 = body['body']
+                caption = body.get('caption', '')
+                t = body['t']
+                jarbas.got_chat(msgfrom, caption, t, img_base64)
             else:
                 print('--- unknown onmessage')
                 print(json.dumps(body, indent=2))
@@ -105,6 +147,15 @@ def main():
     import uvicorn
     logger.info("Iniciando o servidor Uvicorn")
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+def _describe_image(image_base64):
+    messages = [
+        {"role": "user", "content": "Escreva uma descrição para esta imagem. Em português.", "images": [image_base64]},
+    ]
+    response = llm.chat_completions_ollama(messages, 'llava-llama3')
+    return response['content']
+
 
 if __name__ == "__main__":
     main()
