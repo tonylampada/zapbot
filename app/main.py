@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 import jarbas
 import zap
 import logging
+import json
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
@@ -30,7 +31,9 @@ async def got_zap(request: Request):
                 groupfrom = body['from']
                 msgfrom = body['author']
                 senderName = body['sender']['formattedName']
-                jarbas.got_group_chat(groupfrom, msgfrom, senderName, text, t)
+                print('--- group chat')
+                print(json.dumps(body, indent=2))
+                # jarbas.got_group_chat(groupfrom, msgfrom, senderName, text, t)
             else:
                 msgfrom = body['from']
                 jarbas.got_chat(msgfrom, text, t)
