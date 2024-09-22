@@ -47,3 +47,18 @@ def _load_group_cache():
         _id = group['id']['_serialized']
         name = group.get('name') or group.get('contact', {}).get('name', '[UNKNOWN GROUP NAME]')
         group_cache[_id] = {'name': name}
+
+def get_group_messages(group_id, db):
+    return db.query(ZapMessage).filter(ZapMessage.group_id == group_id).order_by(ZapMessage.timestamp).all()
+    
+def _describe_messages(messages):
+    s = ""
+    for m in messages:
+        s += f'<id={m.id} fromname={m.from_name} time={m.timestamp}>{m.message_body}</id={m.id}>\n'
+    return s
+
+if __name__ == '__main__':
+    with dbsession() as db:
+        messages = get_group_messages('120363276371272542@g.us', db)
+        messages = _describe_messages(messages)
+        print(messages)
