@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from models import Diary, DiaryEntry
+import subprocess
 
 def diary_list(user_id: str, db: Session):
     """
@@ -86,6 +87,28 @@ def diary_entry_create(user_id: str, diary_id: int, description: str, db: Sessio
     db.refresh(new_entry)
     return {"id": new_entry.id, "diary_id": new_entry.diary_id, "description": new_entry.description, "created_at": new_entry.created_at}
 
+def execute_command(command: str):
+    """
+    Execute a command in the terminal.
+
+    Args:
+        command (str): The command to execute.
+
+    Returns:
+        dict: A dictionary containing the command output and error (if any).
+    """
+    try:
+        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+        return {
+            "output": result.stdout,
+            "error": result.stderr
+        }
+    except subprocess.CalledProcessError as e:
+        return {
+            "output": e.stdout,
+            "error": e.stderr
+        }
+
 DIARY_LIST = {
     'name': 'diary_list',
     'description': 'Retrieve all diaries for a given user',
@@ -146,5 +169,20 @@ DIARY_ENTRY_CREATE = {
             },
         },
         'required': ['diary_id', 'description'],
+    },
+}
+
+EXECUTE_COMMAND = {
+    'name': 'execute_command',
+    'description': 'Execute a command in the terminal',
+    'parameters': {
+        'type': 'object',
+        'properties': {
+            'command': {
+                'type': 'string',
+                'description': 'The command to execute in the terminal',
+            },
+        },
+        'required': ['command'],
     },
 }
