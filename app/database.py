@@ -1,14 +1,13 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
+import importlib
 from contextlib import contextmanager
 
 # Use this for PostgreSQL:
 # DATABASE_URL = "postgresql://user:password@postgresserver/db"
 
 GLOBAL = {}
-Base = declarative_base()
 
 def _singleton_sessionLocal():
     SessionLocal = GLOBAL.get('SessionLocal')
@@ -22,7 +21,7 @@ def _singleton_sessionLocal():
     return SessionLocal
 
 def create_tables():
-    import models
+    from models import Base
     _singleton_sessionLocal()
     engine = GLOBAL['engine']
     # Base.metadata.drop_all(bind=engine)
@@ -40,3 +39,6 @@ def dbsession():
         raise
     finally:
         db.close()
+
+if __name__ == "__main__":
+    create_tables()
