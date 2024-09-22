@@ -33,7 +33,6 @@ async def got_zap(request: Request):
             if msgType == 'chat':
                 groupChat = {
                     'group_id': body['from'],
-                    'group_name': '???',
                     'message_id': body['id'],
                     'message_type': 'chat',
                     'message_body': body['body'],
@@ -45,7 +44,6 @@ async def got_zap(request: Request):
             elif msgType == 'image':
                 groupChat = {
                     'group_id': body['from'],
-                    'group_name': '???',
                     'message_id': body['id'],
                     'message_type': 'image',
                     'message_body': body.get('caption', ''),
@@ -63,7 +61,6 @@ async def got_zap(request: Request):
                     transcribed = f"AUDIO TRANSCRIBE ERROR: {e}"
                 groupChat = {
                     'group_id': body['from'],
-                    'group_name': '???',
                     'message_id': body['id'],
                     'message_type': 'audio',
                     'message_body': transcribed,
