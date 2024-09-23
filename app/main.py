@@ -1,6 +1,19 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+import sentry_sdk
+from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+import os
+
+# Initialize Sentry
+SENTRY_DSN = os.getenv('SENTRY_DSN')
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=1.0
+    )
+
+
 from logging_config import setup_logging
 setup_logging()
 
@@ -17,9 +30,16 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
+if SENTRY_DSN:
+    app.add_middleware(SentryAsgiMiddleware)
+
 @app.get("/")
 def read_root():
     return {"message": "Hello, World!"}
+
+@app.get("/dapau")
+def read_root():
+    raise Exception("Dapau")
 
 @app.post("/zap")
 async def got_zap(request: Request):

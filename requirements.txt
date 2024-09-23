@@ -134,6 +134,7 @@ rpds-py==0.20.0
 rsa==4.9
 runs==1.2.2
 Send2Trash==1.8.3
+sentry-sdk==2.14.0
 setuptools==72.2.0
 shellingham==1.5.4
 shortuuid==1.0.13

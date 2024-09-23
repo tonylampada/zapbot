@@ -52,7 +52,8 @@ jarbasAgents = JarbasAgents()
 
 def got_chat(user, text, t, img_base64=None):
     if jarbas_commands.is_command(text):
-        return jarbas_commands.handle_command(user, text)
+        with dbsession() as db:
+            return jarbas_commands.handle_command(user, text, db)
     agent = jarbasAgents.getfor(user)
     messages_replied = agent.chat(user, text, t, img_base64)
     reply = messages_replied[-1]['content']

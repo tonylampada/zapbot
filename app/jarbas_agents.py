@@ -27,19 +27,22 @@ class ChatMemory:
 class Agent:
     def __init__(self, name, sysprompt, tools):
         self.name = name
-        self.sysprompt = sysprompt
+        self._sysprompt = sysprompt
         self.tools = [{'type': 'function', 'function': t} for t in tools] if tools else None
+    
+    def sysprompt(self, user, db):
+        if isinstance(self._sysprompt, str):
+            return self._sysprompt
+        elif isinstance(self._sysprompt, types.FunctionType):
+            return self._sysprompt(user, db)
+        else:
+            raise ValueError("sysprompt must be a string or a function")
+
     
     def chat(self, user, text, t, img_base64=None):
         from jarbas import jarbasModels
         with dbsession() as db:
-            if isinstance(self.sysprompt, str):
-                _sysprompt = self.sysprompt
-            elif isinstance(self.sysprompt, types.FunctionType):
-                _sysprompt = self.sysprompt(user, db)
-            else:
-                raise ValueError("sysprompt must be a string or a function")
-            messages = _get_messages_history_and_maybe_reset_and_notify_user(user, _sysprompt)
+            messages = _get_messages_history_and_maybe_reset_and_notify_user(user, self.sysprompt(user, db))
             user_timestamp = datetime.fromtimestamp(t)
             messages.append({"role": "user", "content": text, "timestamp": user_timestamp})
             llm_input_messages = [{"role": m['role'], "content": m['content']} for m in messages]
