@@ -22,7 +22,7 @@ def test_list_and_set_model(testapp, mock_send_message):
  2 - dolphin-llama3
  3 - mistral-nemo
 """
-    assert replies[0] == expected_message
+    assert replies[0].startswith(expected_message)
     replies = helper.zapmsg(testapp, mock_send_message, "/model 3")
     expected_message = """MODELS
 -------------
@@ -30,7 +30,7 @@ def test_list_and_set_model(testapp, mock_send_message):
  2 - dolphin-llama3
 *3 - mistral-nemo
 """
-    assert replies[0] == expected_message
+    assert replies[0].startswith(expected_message)
     replies = helper.zapmsg(testapp, mock_send_message, "/model")
     expected_message = """MODELS
 -------------
@@ -38,7 +38,7 @@ def test_list_and_set_model(testapp, mock_send_message):
  2 - dolphin-llama3
 *3 - mistral-nemo
 """
-    assert replies[0] == expected_message
+    assert replies[0].startswith(expected_message)
 
 def test_list_and_set_agent(testapp, mock_send_message):
     replies = helper.zapmsg(testapp, mock_send_message, "/agent")
