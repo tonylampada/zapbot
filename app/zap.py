@@ -53,6 +53,9 @@ def send_message(sessionName, phone, message):
 def send_group_message(sessionName, phone, message):
     return _post('send-message', sessionName, TOKENS[sessionName], expectCode=201, phone=phone, message=message, isGroup=True, isNewsletter=False)
 
+def send_image(sessionName, phone, filename, caption, base64):
+    return _post('send-message', sessionName, TOKENS[sessionName], expectCode=201, phone=phone, filename=filename, caption=caption, base64=base64, isGroup=False, isNewsletter=False)
+
 def list_chats(sessionName, onlyGroups):
     return _post('list-chats', sessionName, TOKENS[sessionName], onlyGroups=onlyGroups)
 
