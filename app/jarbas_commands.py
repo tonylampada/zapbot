@@ -1,4 +1,6 @@
 import zap
+import imgen_queue
+
 
 HELP_TEXT = """COMMANDS
 -------------
@@ -12,7 +14,7 @@ HELP_TEXT = """COMMANDS
 
 def is_command(text):
     text = text.strip()
-    return text.startswith('/help') or text.startswith('/model') or text.startswith('/agent') or text.startswith('/reset')
+    return text.startswith('/help') or text.startswith('/model') or text.startswith('/agent') or text.startswith('/reset') or text.startswith('/img')
 
 def handle_command(user, command, db):
     try:
@@ -24,6 +26,8 @@ def handle_command(user, command, db):
             return _handle_agent(user, command)
         elif command.startswith('/reset'):
             return _handle_reset(user, db)
+        elif command.startswith('/img'):
+            return _handle_img(user, command)
     except ValueError as e:
         zap.send_message('jarbas', user, f"COMMAND ERROR: {e}")
 
@@ -58,6 +62,10 @@ def _handle_reset(user, db):
     agent = jarbasAgents.getfor(user)
     chatMemory.reset(user, agent.sysprompt(user, db))
     zap.send_message('jarbas', user, "Memória da conversa apagada")
+
+def _handle_img(user, command):
+    prompt = command[4:]
+    imgen_queue.add_imgen_job(user, prompt.strip())
 
 def _list_models(user):
     from jarbas import jarbasModels

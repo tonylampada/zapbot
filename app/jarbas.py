@@ -20,6 +20,7 @@ class JarbasModels:
     default = 'llama3.1'
     available = [
         "llama3.1",
+        "llama3.2",
         "dolphin-llama3",
         "mistral-nemo",
         "llava-llama3",
