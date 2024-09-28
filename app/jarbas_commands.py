@@ -9,6 +9,8 @@ HELP_TEXT = """COMMANDS
 /model <model_id> - Sets the model to use
 /agent - Shows available agents
 /agent <agent_id> - Sets the agent to use
+/img <prompt> - Generates an image
+/img [strength] <prompt> - Generates an image from image + prompt with given strenth
 /reset - Clears chat memory
 """
 
@@ -16,7 +18,7 @@ def is_command(text):
     text = text.strip()
     return text.startswith('/help') or text.startswith('/model') or text.startswith('/agent') or text.startswith('/reset') or text.startswith('/img')
 
-def handle_command(user, command, db):
+def handle_command(user, command, img_base64, db):
     try:
         if command.startswith('/help'):
             return _handle_help(user)
@@ -27,7 +29,7 @@ def handle_command(user, command, db):
         elif command.startswith('/reset'):
             return _handle_reset(user, db)
         elif command.startswith('/img'):
-            return _handle_img(user, command)
+            return _handle_img(user, command, img_base64)
     except ValueError as e:
         zap.send_message('jarbas', user, f"COMMAND ERROR: {e}")
 
@@ -63,9 +65,19 @@ def _handle_reset(user, db):
     chatMemory.reset(user, agent.sysprompt(user, db))
     zap.send_message('jarbas', user, "Memória da conversa apagada")
 
-def _handle_img(user, command):
-    prompt = command[4:]
-    imgen_queue.add_imgen_job(user, prompt.strip())
+def _handle_img(user, command, img_base64):
+    full_command = command[4:].strip()
+    first_word = full_command.split()[0]
+    strength = None
+    try:
+        strength = float(first_word)
+        if 0 < strength < 1:
+            prompt = full_command[len(first_word):].strip()
+        else:
+            prompt = full_command
+    except ValueError:
+        prompt = full_command
+    imgen_queue.add_imgen_job(user, prompt.strip(), img_base64, strength)
 
 def _list_models(user):
     from jarbas import jarbasModels
