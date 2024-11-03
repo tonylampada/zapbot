@@ -18,6 +18,7 @@ from logging_config import setup_logging
 setup_logging()
 
 from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 import jarbas
 import zap
 import llm
@@ -40,6 +41,27 @@ def read_root():
 @app.get("/dapau")
 def read_root():
     raise Exception("Dapau")
+
+@app.get("/connect")
+def connect():
+    started, qrcode, status = zap.start_session('jarbas', webhook='http://172.17.0.1:8000/zap')
+    if started or not qrcode:
+        return {"status": status}
+    elif qrcode:
+        return _webpage_with_image(qrcode)
+
+def _webpage_with_image(qrcode):
+    if not qrcode.startswith("data:image/png;base64"):
+        qrcode = f"data:image/png;base64,{qrcode}"
+    html_content = f"""
+    <html>
+        <body>
+            <h2>Scan the QR code to connect</h2>
+            <img src="{qrcode}" alt="QR Code"/>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 @app.post("/zap")
 async def got_zap(request: Request):
@@ -161,9 +183,6 @@ async def got_zap(request: Request):
 
 def main():
     logger.info("Iniciando a aplicação")
-    if not zap.start_session('jarbas', webhook='http://172.17.0.1:8000/zap'):
-        logger.error("Falha ao iniciar a sessão do Jarbas")
-        return
     import uvicorn
     logger.info("Iniciando o servidor Uvicorn")
     uvicorn.run(app, host="0.0.0.0", port=8000)

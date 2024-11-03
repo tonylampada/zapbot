@@ -1,5 +1,6 @@
-docker run -d --rm \
+docker run -d \
     -p 21465:21465 \
+    --restart unless-stopped \
     --name wppconnect-server \
     -v $(pwd)/docker/wppconfig.js:/usr/src/wpp-server/dist/config.js \
     wppconnect-server

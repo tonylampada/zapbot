@@ -11,21 +11,25 @@ TOKENS = {}
 
 def start_session(sessionName, webhook=None):
     if TOKENS.get(sessionName):
-        return True
+        return True, None, None
     sessions = _show_all_sessions()
     logger.info(f"sessions: {sessions}")
     token = _generate_token(sessionName)
     logger.info(f"token: {token}")
     status = _status_session(sessionName, token)
     logger.info(f"status: {status}")
-    if status not in {'CONNECTED', 'INITIALIZING'}:
+    if status == 'CONNECTED':
+        TOKENS[sessionName] = token
+        return True, None, status
+    else:
         newsession = _start_session(sessionName, token, webhook)
+        print(newsession)
         qrcode = newsession['qrcode']
-        _saveToFile(qrcode, './data/qrcode.png')
-        logger.info("saved qrcode")
-        return False
-    TOKENS[sessionName] = token
-    return True
+        if qrcode:
+            _saveToFile(qrcode, './data/qrcode.png')
+            logger.info("saved qrcode")
+        return False, qrcode, status
+
 
 def _generate_token(sessionName):
     url = f"{BASE_URL}/api/{sessionName}/{SECRET_KEY}/generate-token"
