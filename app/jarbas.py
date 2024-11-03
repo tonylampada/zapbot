@@ -17,8 +17,9 @@ Eu vou te mandar o historico recente do grupo, e vc decide se quer responder ou 
 """
 
 class JarbasModels:
-    default = 'llama3.1'
+    default = "x/llama3.2-vision"
     available = [
+        "x/llama3.2-vision",
         "llama3.1",
         "llama3.2",
         "dolphin-llama3",

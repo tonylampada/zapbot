@@ -34,6 +34,9 @@ app = FastAPI()
 if SENTRY_DSN:
     app.add_middleware(SentryAsgiMiddleware)
 
+def _start_zap():
+    return zap.start_session('jarbas', webhook='http://172.17.0.1:8000/zap')
+
 @app.get("/")
 def read_root():
     return {"message": "Hello, World!"}
@@ -44,7 +47,7 @@ def read_root():
 
 @app.get("/connect")
 def connect():
-    started, qrcode, status = zap.start_session('jarbas', webhook='http://172.17.0.1:8000/zap')
+    started, qrcode, status = _start_zap()
     if started or not qrcode:
         return {"status": status}
     elif qrcode:
@@ -183,6 +186,7 @@ async def got_zap(request: Request):
 
 def main():
     logger.info("Iniciando a aplicação")
+    _start_zap()
     import uvicorn
     logger.info("Iniciando o servidor Uvicorn")
     uvicorn.run(app, host="0.0.0.0", port=8000)

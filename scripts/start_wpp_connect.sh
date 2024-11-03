@@ -1,3 +1,5 @@
+docker stop wppconnect-server
+docker rm wppconnect-server
 docker run -d \
     -p 21465:21465 \
     --restart unless-stopped \
